@@ -3,7 +3,7 @@
     <div class="wrapper">
       <vue-three-sixty
           :amount=12
-          imagePath="/small/"
+          imagePath="/images"
           fileName="Darby_{index}.jpg?v3"
       />
     </div>
