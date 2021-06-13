@@ -1,17 +1,36 @@
 <template>
   <div id="app">
     <div class="wrapper">
-      <View360
-          :amount=36
-          :padding-index="true"
-          :padding-size="4"
-          :index-from="0"
-          image-path="/images/Solar99"
-          file-name="Solar99_360__{index}.jpg"
-          :big-previews="true"
-          big-image-path="/images/Solar99/Zoom"
-          big-file-name="Solar99_Zoom_{index}.jpg"
-      />
+        <div class="component">
+            <View360
+                :amount=36
+                :padding-index="true"
+                :padding-size="4"
+                :index-from="0"
+                image-path="/images/Solar99"
+                file-name="Solar99_360__{index}.jpg"
+                :layer-image-path="layerImagePath"
+                :layer-file-name="layerFileName"
+                :big-previews="true"
+                big-image-path="/images/Solar99/Zoom"
+                big-file-name="Solar99_Zoom_{index}.jpg"
+            />
+        </div>
+
+        <div class="configurator">
+            <h3>Select pillows:</h3>
+
+            <div class="pillows">
+                <div class="pillow pillow--big"
+                     :class="{ 'pillow--selected': selectedPillows === 'big' }"
+                     @click="selectPillows('big')"
+                ></div>
+                <div class="pillow pillow--small"
+                     :class="{ 'pillow--selected': selectedPillows === 'small' }"
+                     @click="selectPillows('small')"
+                ></div>
+            </div>
+        </div>
     </div>
   </div>
 </template>
@@ -20,26 +39,86 @@
 import View360 from "@/components/View360";
 
 export default {
-  name: 'App',
+    name: 'App',
 
-  components: {
-    View360,
-  }
+    components: {
+        View360,
+    },
+
+    data() {
+      return {
+          layerImagePath: null,
+          layerFileName: null,
+          selectedPillows: null,
+      }
+    },
+
+    methods: {
+        selectPillows(type) {
+            this.selectedPillows = type;
+
+            if (type === 'big') {
+                this.layerImagePath = '/images/BigPillows';
+                this.layerFileName = 'BP_Rain12_360_{index}.png';
+            } else if (type === 'small') {
+                this.layerImagePath = '/images/SmallPillows';
+                this.layerFileName = 'SP_Rain24_360__{index}.png';
+            }
+        }
+    }
 }
 </script>
 
 <style>
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+      font-family: Avenir, Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-align: center;
+      color: #2c3e50;
+      margin-top: 60px;
 }
 
 .wrapper {
-  width: 853px;
-  margin: 0 auto;
+    display: flex;
+    flex-direction: row;
+    width: 60%;
+    margin: 0 auto;
+}
+
+.wrapper .component {
+    border: 1px solid grey;
+    flex-shrink: 1;
+}
+
+.wrapper .configurator {
+    border: 1px solid grey;
+    flex-grow: 1;
+    padding: 0 36px;
+}
+
+.pillows {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 16px
+}
+
+.pillow {
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+}
+
+.pillow.pillow--big {
+    background-color: darkgoldenrod;
+}
+
+.pillow.pillow--small {
+    background-color: #888888;
+}
+
+.pillow.pillow--selected {
+    border: 1px solid deepskyblue;
 }
 </style>

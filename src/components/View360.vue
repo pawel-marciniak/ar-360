@@ -76,13 +76,23 @@
             <!--/ Buttons Container -->
 
             <!-- Preview Modal -->
-            <div id="previewModal" class="modal" v-show="showImagePreview">
+            <div id="previewModal"
+                 class="modal"
+                 v-show="showImagePreview"
+                 @click.stop="showImagePreview = false"
+            >
 
                 <!-- Modal content -->
-                <div class="modal-content">
+                <div class="modal-content" @click.stop.prevent>
                     <span class="close" @click="showImagePreview = false">&times;</span>
 
-                    <img :src="currentImagePreview" />
+                    <div class="preview-image-wrapper">
+                        <img :src="currentImagePreview" />
+                        <img v-if="currentLayerImage"
+                             :src="currentLayerImage.src"
+                             class="preview-layer-image"
+                        />
+                    </div>
                 </div>
 
             </div>
@@ -119,6 +129,16 @@ export default {
             default: ''
         },
         bigFileName: {
+            type: String,
+            require: false,
+            default: ''
+        },
+        layerImagePath: {
+            type: String,
+            require: false,
+            default: ''
+        },
+        layerFileName: {
             type: String,
             require: false,
             default: ''
@@ -207,6 +227,7 @@ export default {
             lastX: 0,
             lastY: 0,
             currentCanvasImage: null,
+            currentLayerImage: null,
             isFullScreen: false,
             viewPortElementWidth: null,
             movementStart: 0,
@@ -224,7 +245,9 @@ export default {
             currentLoop: 0,
             loopTimeoutId: 0,
             images: [],
+            layerImages: [],
             imageData: [],
+            layerImageData: [],
             playing: false,
             currentImagePreview: null,
             showImagePreview: false
@@ -266,20 +289,31 @@ export default {
             }else{
                 this.stop()
             }
+        },
+        layerImagePath() {
+            this.fetchLayerData();
+            this.update();
+        },
+        layerFileName() {
+            this.fetchLayerData();
+            this.update();
         }
     },
+
     mounted(){
         //this.toggleFullScreen()
-        this.fetchData()
+        this.fetchData();
+        this.fetchLayerData();
         document.addEventListener('fullscreenchange', this.exitHandler);
         document.addEventListener('webkitfullscreenchange', this.exitHandler);
         document.addEventListener('mozfullscreenchange', this.exitHandler);
         document.addEventListener('MSFullscreenChange', this.exitHandler);
     },
+
     methods: {
       onTap() {
           if (this.bigPreviews) {
-              const imageIndex = (this.paddingIndex) ? this.lpad(this.activeImage, "0", this.paddingSize) : this.activeImage;
+              const imageIndex = (this.paddingIndex) ? this.lpad((this.activeImage - 1), "0", this.paddingSize) : (this.activeImage - 1);
               const fileName = this.bigFileName.replace('{index}', imageIndex);
 
               this.currentImagePreview = `${this.bigImagePath}/${fileName}`;
@@ -298,15 +332,31 @@ export default {
 
             this.playing = this.autoplay
         },
-        fetchData(){
+
+        fetchData() {
             for (let i = this.indexFrom; i <= (this.amount + (this.indexFrom - 1)); i++) {
                 const imageIndex = (this.paddingIndex) ? this.lpad(i, "0", this.paddingSize) : i
                 const fileName = this.fileName.replace('{index}', imageIndex);
-                const filePath = `${this.imagePath}/${fileName}`
-                this.imageData.push(filePath)
+                const filePath = `${this.imagePath}/${fileName}`;
+                this.imageData.push(filePath);
             }
 
             this.preloadImages()
+        },
+
+        fetchLayerData() {
+            this.layerImageData = [];
+
+            if (this.layerImagePath && this.layerFileName) {
+                for (let i = this.indexFrom; i <= (this.amount + (this.indexFrom - 1)); i++) {
+                    const imageIndex = (this.paddingIndex) ? this.lpad(i, "0", this.paddingSize) : i
+                    const fileName = this.layerFileName.replace('{index}', imageIndex);
+                    const filePath = `${this.layerImagePath}/${fileName}`;
+                    this.layerImageData.push(filePath);
+                }
+
+                this.preloadLayerImages();
+            }
         },
 
         lpad(str, padString, length) {
@@ -316,10 +366,10 @@ export default {
             return str
         },
 
-        preloadImages(){
+        preloadImages() {
             if (this.imageData.length) {
                 try {
-                    this.amount = this.imageData.length;
+                    // this.amount = this.imageData.length;
                     this.imageData.forEach(src => {
                         this.addImage(src);
                     });
@@ -330,6 +380,23 @@ export default {
                 console.log('No Images Found')
             }
         },
+
+        preloadLayerImages() {
+            if (this.layerImageData.length) {
+                try {
+                    this.layerImages = [];
+                    // this.amount = this.layerImageData.length;
+                    this.layerImageData.forEach(src => {
+                        this.addLayerImage(src);
+                    });
+                } catch (error) {
+                    console.error(`Something went wrong while loading images: ${error.message}`);
+                }
+            } else {
+                console.log('No Images Found')
+            }
+        },
+
         addImage(resultSrc){
             const image = new Image();
 
@@ -340,6 +407,15 @@ export default {
 
             this.images.push(image);
         },
+
+        addLayerImage(resultSrc){
+            const image = new Image();
+
+            image.src = resultSrc;
+
+            this.layerImages.push(image);
+        },
+
         onImageLoad(event) {
             const percentage = Math.round(this.loadedImages / this.amount * 100);
 
@@ -353,6 +429,7 @@ export default {
                 console.log('load first image')
             }
         },
+
         updatePercentageInLoader(percentage) {
             /* if (this.loader) {
                 this.loader.style.width = percentage + '%';
@@ -365,31 +442,37 @@ export default {
             this.$refs.viewPercentage.innerHTML = percentage + '%';
             //console.log(percentage + '%')
         },
+
         onAllImagesLoaded(){
             this.imagesLoaded = true
             this.initData()
         },
+
         togglePlay(){
             this.playing = !this.playing
         },
+
         play(){
             this.loopTimeoutId = window.setInterval(() => this.loopImages(), 100);
         },
+
         onSpin() {
             if (this.playing || this.loopTimeoutId) {
                 this.stop();
             }
         },
+
         stop() {
-            if(this.activeImage == 1){
+            if(this.activeImage === 1){
                 this.currentLoop = 0
             }
             this.playing = false;
             window.clearTimeout(this.loopTimeoutId);
         },
+
         loopImages() {
-            if(this.activeImage == 1){
-                if(this.currentLoop == this.loop){
+            if(this.activeImage === 1){
+                if(this.currentLoop === this.loop){
                     this.stop()
                 }
                 else{
@@ -402,44 +485,57 @@ export default {
                 this.next()
             }
         },
+
         next() {
             (this.spinReverse) ? this.turnLeft() : this.turnRight()
         },
+
         prev() {
             (this.spinReverse) ? this.turnRight() : this.turnLeft()
         },
+
         turnLeft(){
             this.moveActiveIndexDown(1);
         },
+
         turnRight(){
             this.moveActiveIndexUp(1);
         },
+
         loadImages(){
             console.log('load image')
         },
+
         checkMobile(){
             this.isMobile = !!('ontouchstart' in window || navigator.msMaxTouchPoints);
         },
+
         loadInitialImage(){
             this.currentImage = this.imageData[0]
             this.setImage()
         },
+
         resizeWindow(){
             this.setImage()
         },
+
         onPinch(){
             console.log('on tap')
         },
+
         onPinchEnd(){
             this.tempScale = 0
         },
+
         onPinchIn(){
             //alert('pinchin:' + evt.scale)
             this.zoomOut()
         },
+
         onPinchOut(){
             this.zoomIn()
         },
+
         attachEvents(){
             if(this.panmode){
                 this.bindPanModeEvents()
@@ -447,6 +543,7 @@ export default {
                 this.bind360ModeEvents()
             }
         },
+
         bindPanModeEvents(){
             this.$refs.viewport.removeEventListener('touchend', this.touchEnd);
             this.$refs.viewport.removeEventListener('touchstart', this.touchStart);
@@ -466,6 +563,7 @@ export default {
 
             this.$refs.viewport.addEventListener('wheel', this.onScroll);
         },
+
         bind360ModeEvents(){
             this.$refs.viewport.removeEventListener('touchend', this.stopDragging);
             this.$refs.viewport.removeEventListener('touchstart', this.startDragging);
@@ -485,9 +583,11 @@ export default {
 
             this.$refs.viewport.addEventListener('wheel', this.onScroll);
         },
+
         togglePanMode(){
             this.panmode = !this.panmode
         },
+
         zoomIn() {
             if(this.disableZoom) return;
 
@@ -495,6 +595,7 @@ export default {
             this.lastY = this.centerY
             this.zoom(2)
         },
+
         zoomOut() {
             if(this.disableZoom) return;
 
@@ -502,27 +603,33 @@ export default {
             this.lastY = this.centerY
             this.zoom(-2)
         },
+
         moveLeft() {
             this.currentLeftPosition += this.customOffset;
         },
+
         moveRight() {
             this.currentLeftPosition -= this.customOffset;
         },
+
         moveUp() {
             this.currentTopPosition += this.customOffset;
         },
+
         moveDown() {
             this.currentTopPosition -= this.customOffset;
         },
+
         resetPosition(){
             this.currentScale = 1
             this.activeImage = 1
             this.setImage(true)
         },
-        setImage(cached = false){
+
+        setImage(cached = false) {
             this.currentLeftPosition = this.currentTopPosition = 0
 
-            if(!cached){
+            if (!cached) {
                 this.currentCanvasImage = new Image()
                 this.currentCanvasImage.crossOrigin='anonymous'
                 this.currentCanvasImage.src = this.currentImage
@@ -539,21 +646,20 @@ export default {
                 this.currentCanvasImage.onerror = () => {
                     console.log('cannot load this image')
                 }
-            }else{
+            } else {
                 this.currentCanvasImage = this.images[0]
                 let viewportElement = this.$refs.viewport.getBoundingClientRect()
                 this.canvas.width  = (this.isFullScreen) ? viewportElement.width : this.currentCanvasImage.width
                 this.canvas.height = (this.isFullScreen) ? viewportElement.height : this.currentCanvasImage.height
                 this.trackTransforms(this.ctx)
 
-                this.redraw()
+                this.redraw();
             }
 
         },
-        redraw(){
 
+        redraw() {
             try {
-
                 let p1 = this.ctx.transformedPoint(0,0);
                 let p2 = this.ctx.transformedPoint(this.canvas.width,this.canvas.height)
 
@@ -562,23 +668,32 @@ export default {
                 let ratio  = Math.min(hRatio, vRatio);
                 let centerShift_x = (this.canvas.width - this.currentCanvasImage.width*ratio )/2
                 let centerShift_y = (this.canvas.height - this.currentCanvasImage.height*ratio )/2
-                this.ctx.clearRect(p1.x,p1.y,p2.x-p1.x,p2.y-p1.y);
+                this.ctx.clearRect(p1.x, p1.y, p2.x - p1.x, p2.y - p1.y);
 
                 this.centerX = this.currentCanvasImage.width*ratio/2
                 this.centerY = this.currentCanvasImage.height*ratio/2
 
                 //center image
-                this.ctx.drawImage(this.currentCanvasImage, this.currentLeftPosition, this.currentTopPosition, this.currentCanvasImage.width, this.currentCanvasImage.height,
-                            centerShift_x,centerShift_y,this.currentCanvasImage.width*ratio, this.currentCanvasImage.height*ratio);
+                this.ctx.drawImage(
+                    this.currentCanvasImage,
+                    this.currentLeftPosition,
+                    this.currentTopPosition,
+                    this.currentCanvasImage.width,
+                    this.currentCanvasImage.height,
+                    centerShift_x,
+                    centerShift_y,
+                    this.currentCanvasImage.width * ratio,
+                    this.currentCanvasImage.height * ratio
+                );
 
-                this.addHotspots()
-
-            }
-            catch(e){
+                this.addHotspots();
+                this.addLayer();
+            } catch(e){
                 this.trackTransforms(this.ctx)
             }
 
         },
+
         addHotspots(){
             this.clearHotspots()
 
@@ -629,12 +744,37 @@ export default {
                 //this.ctx.drawImage(this.currentCanvasImage, hotspotElement.x*this.canvas.width, hotspotElement.y*this.canvas.height, 10, 10)
             }
         },
+
+        addLayer() {
+          if (this.currentLayerImage) {
+              let hRatio = this.canvas.width / this.currentLayerImage.width;
+              let vRatio =  this.canvas.height / this.currentLayerImage.height;
+              let ratio  = Math.min(hRatio, vRatio);
+              let centerShift_x = (this.canvas.width - this.currentLayerImage.width * ratio ) / 2;
+              let centerShift_y = (this.canvas.height - this.currentLayerImage.height * ratio ) / 2;
+
+              //center image
+              this.ctx.drawImage(
+                  this.currentLayerImage,
+                  this.currentLeftPosition,
+                  this.currentTopPosition,
+                  this.currentLayerImage.width,
+                  this.currentLayerImage.height,
+                  centerShift_x,
+                  centerShift_y,
+                  this.currentLayerImage.width * ratio,
+                  this.currentLayerImage.height * ratio
+              );
+          }
+        },
+
         clearHotspots(){
             let hotspotButtons = document.getElementById(this.identifier).querySelectorAll('.tooltip')
 
             if(hotspotButtons.length)
                 hotspotButtons.forEach(element => element.remove())
         },
+
         onMove(pageX){
             if (pageX - this.movementStart >= this.speedFactor) {
                 let itemsSkippedRight = Math.floor((pageX - this.movementStart) / this.speedFactor) || 1;
@@ -664,16 +804,19 @@ export default {
                 this.redraw();
             }
         },
+
         startMoving(evt){
             this.movement = true
             this.movementStart = evt.pageX;
             this.$refs.viewport.style.cursor = 'grabbing';
         },
+
         doMoving(evt){
             if(this.movement){
                 this.onMove(evt.clientX)
             }
         },
+
         onScroll(evt){
             evt.preventDefault();
 
@@ -688,6 +831,7 @@ export default {
                 this.zoomImage(evt);
             }
         },
+
         moveActiveIndexUp(itemsSkipped) {
 
             if (this.stopAtEdges) {
@@ -702,6 +846,7 @@ export default {
 
             this.update()
         },
+
         moveActiveIndexDown(itemsSkipped) {
 
             if (this.stopAtEdges) {
@@ -720,27 +865,41 @@ export default {
 
             this.update()
         },
+
         update() {
             const image = this.images[this.activeImage - 1];
+            const layerImage = this.layerImages.length > 0 ? this.layerImages[this.activeImage - 1] : null;
 
             this.currentCanvasImage = image
+            this.currentLayerImage = layerImage
 
-            this.redraw()
+            if (this.currentLayerImage) {
+                this.currentLayerImage.onload = () => {
+                    this.redraw();
+                }
+            }
+
+            this.redraw();
         },
+
         stopMoving(){
             this.movement = false
             this.movementStart = 0
             this.$refs.viewport.style.cursor = 'grab'
         },
+
         touchStart(evt){
             this.movementStart = evt.touches[0].clientX
         },
+
         touchMove(evt){
             this.onMove(evt.touches[0].clientX)
         },
+
         touchEnd(){
             this.movementStart = 0
         },
+
         startDragging(evt){
             this.dragging = true
             document.body.style.mozUserSelect = document.body.style.webkitUserSelect = document.body.style.userSelect = 'none';
@@ -753,36 +912,41 @@ export default {
             }
           this.dragStart = this.ctx.transformedPoint(this.lastX,this.lastY);
         },
-        doDragging(evt){
 
-            if(this.isMobile){
+        doDragging(evt){
+            if (this.isMobile) {
                 this.lastX = evt.touches[0].offsetX || (evt.touches[0].pageX - this.canvas.offsetLeft);
                 this.lastY = evt.touches[0].offsetY || (evt.touches[0].pageY - this.canvas.offsetTop);
-            }else{
+            } else {
                 this.lastX = evt.offsetX || (evt.pageX - this.canvas.offsetLeft);
                 this.lastY = evt.offsetY || (evt.pageY - this.canvas.offsetTop);
             }
 
-            if (this.dragStart){
+            if (this.dragStart) {
 				let pt = this.ctx.transformedPoint(this.lastX,this.lastY);
 				this.ctx.translate(pt.x-this.dragStart.x,pt.y-this.dragStart.y);
                 //redraw();
                 this.redraw();
             }
         },
+
         stopDragging(){
             this.dragging = false
             this.dragStart = null
         },
+
         restrictScale(){
-            let scale = this.currentScale
+            let scale = this.currentScale;
+
             if (scale < this.minScale) {
                 scale = this.minScale;
             } else if (scale > this.maxScale) {
                 scale = this.maxScale;
             }
+
             return scale;
         },
+
         zoom(clicks){
             //console.log(this.lastX + ' - ' + this.lastY)
             let factor = Math.pow(1.01,clicks);
@@ -807,6 +971,7 @@ export default {
                 this.redraw();
             }
         },
+
         zoomImage(evt){
             if(this.disableZoom) return;
 
@@ -819,6 +984,7 @@ export default {
             return evt.preventDefault() && false;
 
         },
+
         trackTransforms(ctx){
 
             return new Promise(resolve => {
@@ -880,6 +1046,7 @@ export default {
             })
 
         },
+
         toggleFullScreen(){
             this.isFullScreen = !this.isFullScreen
         },
@@ -1205,7 +1372,7 @@ export default {
 
 .modal {
     position: fixed; /* Stay in place */
-    z-index: 1; /* Sit on top */
+    z-index: 200; /* Sit on top */
     left: 0;
     top: 0;
     width: 100%; /* Full width */
@@ -1241,5 +1408,16 @@ export default {
 
 #previewModal img {
     width: 100%;
+}
+
+#previewModal .preview-image-wrapper {
+    position: relative;
+    clear: both;
+}
+
+#previewModal .preview-image-wrapper .preview-layer-image {
+    position: absolute;
+    left: 0;
+    top: 0;
 }
 </style>
