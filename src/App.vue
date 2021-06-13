@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <div class="wrapper">
-      <vue-three-sixty
+      <view-360
           :amount=12
           imagePath="/images"
           fileName="Darby_{index}.jpg?v3"
@@ -11,8 +11,14 @@
 </template>
 
 <script>
+import View360 from "@/components/View360";
+
 export default {
   name: 'App',
+
+  components: {
+    View360,
+  }
 }
 </script>
 
