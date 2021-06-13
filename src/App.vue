@@ -1,10 +1,16 @@
 <template>
   <div id="app">
     <div class="wrapper">
-      <view-360
-          :amount=12
-          imagePath="/images"
-          fileName="Darby_{index}.jpg?v3"
+      <View360
+          :amount=36
+          :padding-index="true"
+          :padding-size="4"
+          :index-from="0"
+          image-path="/images/Solar99"
+          file-name="Solar99_360__{index}.jpg"
+          :big-previews="true"
+          big-image-path="/images/Solar99/Zoom"
+          big-file-name="Solar99_Zoom_{index}.jpg"
       />
     </div>
   </div>

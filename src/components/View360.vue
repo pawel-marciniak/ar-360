@@ -19,7 +19,7 @@
                 <canvas
                     class="v360-image-container"
                     ref="imageContainer"
-                    v-hammer:tap="onTapping"
+                    v-hammer:tap="onTap"
                     v-hammer:pinch="onPinch"
                     v-hammer:pinchend="onPinch"
                     v-hammer:pinchout="onPinchOut"
@@ -75,6 +75,18 @@
             </div>
             <!--/ Buttons Container -->
 
+            <!-- Preview Modal -->
+            <div id="previewModal" class="modal" v-show="showImagePreview">
+
+                <!-- Modal content -->
+                <div class="modal-content">
+                    <span class="close" @click="showImagePreview = false">&times;</span>
+
+                    <img :src="currentImagePreview" />
+                </div>
+
+            </div>
+            <!--/ Preview Modal -->
         </div>
         <!--/ 360 Viewer Container -->
     </div>
@@ -95,6 +107,26 @@ export default {
             type: String,
             require: true,
             default: ''
+        },
+        bigPreviews: {
+            type: Boolean,
+            require: false,
+            default: false
+        },
+        bigImagePath: {
+            type: String,
+            require: false,
+            default: ''
+        },
+        bigFileName: {
+            type: String,
+            require: false,
+            default: ''
+        },
+        indexFrom: {
+            type: Number,
+            require: false,
+            default: 1
         },
         spinReverse: {
             type: Boolean,
@@ -140,6 +172,11 @@ export default {
             type: Boolean,
             require: false,
             default: false
+        },
+        paddingSize: {
+            type: Number,
+            require: false,
+            default: 2
         },
         disableZoom: {
             type: Boolean,
@@ -188,7 +225,9 @@ export default {
             loopTimeoutId: 0,
             images: [],
             imageData: [],
-            playing: false
+            playing: false,
+            currentImagePreview: null,
+            showImagePreview: false
         }
     },
     watch: {
@@ -238,8 +277,14 @@ export default {
         document.addEventListener('MSFullscreenChange', this.exitHandler);
     },
     methods: {
-      onTapping() {
-        console.log('TAP!');
+      onTap() {
+          if (this.bigPreviews) {
+              const imageIndex = (this.paddingIndex) ? this.lpad(this.activeImage, "0", this.paddingSize) : this.activeImage;
+              const fileName = this.bigFileName.replace('{index}', imageIndex);
+
+              this.currentImagePreview = `${this.bigImagePath}/${fileName}`;
+              this.showImagePreview = true;
+          }
       },
         initData(){
             this.checkMobile()
@@ -254,9 +299,8 @@ export default {
             this.playing = this.autoplay
         },
         fetchData(){
-
-            for(let i=1; i <= this.amount; i++){
-                const imageIndex = (this.paddingIndex) ? this.lpad(i, "0", 2) : i
+            for (let i = this.indexFrom; i <= (this.amount + (this.indexFrom - 1)); i++) {
+                const imageIndex = (this.paddingIndex) ? this.lpad(i, "0", this.paddingSize) : i
                 const fileName = this.fileName.replace('{index}', imageIndex);
                 const filePath = `${this.imagePath}/${fileName}`
                 this.imageData.push(filePath)
@@ -844,6 +888,10 @@ export default {
 </script>
 
 <style>
+.v360-viewer-container {
+    position: relative;
+}
+
 .v360-main {
   width: 100%;
   height: 100%;
@@ -1154,4 +1202,44 @@ export default {
 /* .hotspot-button{
     position: absolute;
 } */
+
+.modal {
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content/Box */
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* Could be more or less, depending on screen size */
+}
+
+/* The Close Button */
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+#previewModal img {
+    width: 100%;
+}
 </style>
