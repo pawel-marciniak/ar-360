@@ -46,7 +46,7 @@
             <!--/ Fullscreen Button -->
 
             <!-- Buttons Container -->
-            <div id="v360-menu-btns" :class="buttonClass">
+            <div v-if="showButtons" id="v360-menu-btns" :class="buttonClass">
                 <div class="v360-navigate-btns">
                     <div class="v360-menu-btns" @click="togglePlay" :class="(playing) ? 'v360-btn-active' : ''">
                         <i class="fa fa-play" v-if="!playing"></i>
@@ -204,6 +204,11 @@ export default {
             default: false
         },
         scrollImage: {
+            type: Boolean,
+            require: false,
+            default: false
+        },
+        showButtons: {
             type: Boolean,
             require: false,
             default: false
