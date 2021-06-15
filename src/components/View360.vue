@@ -2,6 +2,12 @@
     <div>
         <!-- 360 Viewer Container -->
         <div class="v360-viewer-container" ref="viewerContainer" :id="identifier">
+            <div v-show="showImagePreview"
+                 ref="mobileZoomContainer"
+                 class="mobile-zoom-container"
+            >
+                <img :src="currentImagePreview"/>
+            </div>
 
             <!-- 360 Viewer Header -->
             <slot name="header"></slot>
@@ -19,27 +25,50 @@
                 <canvas
                     class="v360-image-container"
                     ref="imageContainer"
-                    v-hammer:tap="onTap"
+                    v-hammer:tap="!isMobile && showBigPreview"
                     v-hammer:pinch="onPinch"
                     v-hammer:pinchend="onPinch"
                     v-hammer:pinchout="onPinchOut"
                     v-hammer:pinchin="onPinchIn"
                 ></canvas>
                 <div class="v360-product-box-shadow"
-                    v-if="boxShadow"
-                    v-hammer:pinch="onPinch"
-                    v-hammer:pinchend="onPinch"
-                    v-hammer:pinchout="onPinchOut"
-                    v-hammer:pinchin="onPinchIn"
+                     v-if="boxShadow"
+                     v-hammer:pinch="onPinch"
+                     v-hammer:pinchend="onPinch"
+                     v-hammer:pinchout="onPinchOut"
+                     v-hammer:pinchin="onPinchIn"
                 ></div>
+
+                <figure v-show="showImagePreview && !isMobile"
+                        ref="zoomContainer"
+                        class="zoom"
+                        :style="`background-image: url(${currentImagePreview})`"
+                        style="background-position: 50% 50%"
+                        @mousemove="inPlaceZoom($event)"
+                        @click="showImagePreview = false"
+                >
+                    <img :src="currentImagePreview" />
+                </figure>
             </div>
             <!--/ 360 viewport -->
 
             <!-- Fullscreen Button -->
-            <abbr title="Fullscreen Toggle">
-                <div class="v360-fullscreen-toggle text-center" @click="toggleFullScreen">
-                    <div class="v360-fullscreen-toggle-btn" :class="(buttonClass == 'dark') ? 'text-light' : 'text-dark'">
+            <abbr>
+                <div class="v360-fullscreen-toggle text-center">
+                    <div v-show="!showImagePreview"
+                         class="v360-toggle-btn"
+                         :class="(buttonClass === 'dark') ? 'text-light' : 'text-dark'"
+                         @click="toggleFullScreen"
+                    >
                         <i :class="(!isFullScreen) ? 'fas fa-expand text-lg' : 'fas fa-compress text-lg'"></i>
+                    </div>
+
+                    <div v-if="isMobile"
+                         class="v360-toggle-btn mobile-toggle-zoom"
+                         :class="(buttonClass === 'dark') ? 'text-light' : 'text-dark'"
+                         @click="showImagePreview ? (showImagePreview = false) : showBigPreview($event)"
+                    >
+                        <i :class="(!showImagePreview) ? 'fas fa-search-plus text-lg' : 'fas fa-search-minus text-lg'"></i>
                     </div>
                 </div>
             </abbr>
@@ -74,29 +103,6 @@
                 </div>
             </div>
             <!--/ Buttons Container -->
-
-            <!-- Preview Modal -->
-            <div id="previewModal"
-                 class="modal"
-                 v-show="showImagePreview"
-                 @click.stop="showImagePreview = false"
-            >
-
-                <!-- Modal content -->
-                <div class="modal-content" @click.stop.prevent>
-                    <span class="close" @click="showImagePreview = false">&times;</span>
-
-                    <div class="preview-image-wrapper">
-                        <img :src="currentImagePreview" />
-                        <img v-if="currentLayerImage"
-                             :src="currentLayerImage.src"
-                             class="preview-layer-image"
-                        />
-                    </div>
-                </div>
-
-            </div>
-            <!--/ Preview Modal -->
         </div>
         <!--/ 360 Viewer Container -->
     </div>
@@ -214,7 +220,7 @@ export default {
             default: false
         }
     },
-    data(){
+    data() {
         return {
             minScale: 0.5,
             maxScale: 4,
@@ -259,26 +265,26 @@ export default {
         }
     },
     watch: {
-        currentLeftPosition(){
+        currentLeftPosition() {
             this.redraw()
         },
-        currentTopPosition(){
+        currentTopPosition() {
             this.redraw()
         },
-        viewPortElementWidth(){
+        viewPortElementWidth() {
             this.update()
         },
-        panmode(){
+        panmode() {
             this.attachEvents()
         },
-        isFullScreen(value){
-            if(!value){
+        isFullScreen(value) {
+            if (!value) {
                 //exit full screen
                 this.$refs.viewerContainer.classList.remove('v360-main')
                 this.$refs.viewerContainer.classList.remove('v360-fullscreen')
                 /* this.$refs.enterFullScreenIcon.style.display = 'block'
                 this.$refs.leaveFullScreenIcon.style.display = 'none' */
-            }else{
+            } else {
                 //enter full screen
                 this.$refs.viewerContainer.classList.add('v360-main')
                 this.$refs.viewerContainer.classList.add('v360-fullscreen')
@@ -288,10 +294,10 @@ export default {
             }
             this.setImage()
         },
-        playing(value){
-            if(value){
+        playing(value) {
+            if (value) {
                 this.play()
-            }else{
+            } else {
                 this.stop()
             }
         },
@@ -305,7 +311,7 @@ export default {
         }
     },
 
-    mounted(){
+    mounted() {
         //this.toggleFullScreen()
         this.fetchData();
         this.fetchLayerData();
@@ -316,16 +322,37 @@ export default {
     },
 
     methods: {
-      onTap() {
-          if (this.bigPreviews) {
-              const imageIndex = (this.paddingIndex) ? this.lpad((this.activeImage - 1), "0", this.paddingSize) : (this.activeImage - 1);
-              const fileName = this.bigFileName.replace('{index}', imageIndex);
+        showBigPreview(e) {
+            if (this.bigPreviews) {
+                const imageIndex = (this.paddingIndex) ? this.lpad((this.activeImage - 1), "0", this.paddingSize) : (this.activeImage - 1);
+                const fileName = this.bigFileName.replace('{index}', imageIndex);
 
-              this.currentImagePreview = `${this.bigImagePath}/${fileName}`;
-              this.showImagePreview = true;
-          }
-      },
-        initData(){
+                this.currentImagePreview = `${this.bigImagePath}/${fileName}`;
+                this.showImagePreview = true;
+
+                if (!this.isMobile) {
+                    const zoomer = this.$refs.viewport;
+
+                    let offsetX = e.srcEvent.offsetX;
+                    let offsetY = e.srcEvent.offsetY;
+
+                    const x = offsetX / zoomer.offsetWidth * 100;
+                    const y = offsetY / zoomer.offsetHeight * 100;
+
+                    this.$refs.zoomContainer.style.backgroundPosition = x + '% ' + y + '%';
+                } else {
+                    let offsetX = this.$refs.viewport.offsetWidth / 2;
+                    let offsetY = this.$refs.viewport.offsetHeight / 2;
+
+                    this.$refs.mobileZoomContainer.scrollTo(offsetX, offsetY);
+
+                    setTimeout(() => {
+                        this.$refs.mobileZoomContainer.scrollTo(1500, 1000);
+                    }, 200);
+                }
+            }
+        },
+        initData() {
             this.checkMobile()
             this.loadInitialImage()
 
@@ -402,7 +429,7 @@ export default {
             }
         },
 
-        addImage(resultSrc){
+        addImage(resultSrc) {
             const image = new Image();
 
             image.src = resultSrc;
@@ -413,7 +440,7 @@ export default {
             this.images.push(image);
         },
 
-        addLayerImage(resultSrc){
+        addLayerImage(resultSrc) {
             const image = new Image();
 
             image.src = resultSrc;
@@ -448,16 +475,16 @@ export default {
             //console.log(percentage + '%')
         },
 
-        onAllImagesLoaded(){
+        onAllImagesLoaded() {
             this.imagesLoaded = true
             this.initData()
         },
 
-        togglePlay(){
+        togglePlay() {
             this.playing = !this.playing
         },
 
-        play(){
+        play() {
             this.loopTimeoutId = window.setInterval(() => this.loopImages(), 100);
         },
 
@@ -468,7 +495,7 @@ export default {
         },
 
         stop() {
-            if(this.activeImage === 1){
+            if (this.activeImage === 1) {
                 this.currentLoop = 0
             }
             this.playing = false;
@@ -476,17 +503,15 @@ export default {
         },
 
         loopImages() {
-            if(this.activeImage === 1){
-                if(this.currentLoop === this.loop){
+            if (this.activeImage === 1) {
+                if (this.currentLoop === this.loop) {
                     this.stop()
-                }
-                else{
+                } else {
                     this.currentLoop++
 
                     this.next()
                 }
-            }
-            else{
+            } else {
                 this.next()
             }
         },
@@ -499,57 +524,57 @@ export default {
             (this.spinReverse) ? this.turnRight() : this.turnLeft()
         },
 
-        turnLeft(){
+        turnLeft() {
             this.moveActiveIndexDown(1);
         },
 
-        turnRight(){
+        turnRight() {
             this.moveActiveIndexUp(1);
         },
 
-        loadImages(){
+        loadImages() {
             console.log('load image')
         },
 
-        checkMobile(){
+        checkMobile() {
             this.isMobile = !!('ontouchstart' in window || navigator.msMaxTouchPoints);
         },
 
-        loadInitialImage(){
+        loadInitialImage() {
             this.currentImage = this.imageData[0]
             this.setImage()
         },
 
-        resizeWindow(){
+        resizeWindow() {
             this.setImage()
         },
 
-        onPinch(){
+        onPinch() {
             console.log('on tap')
         },
 
-        onPinchEnd(){
+        onPinchEnd() {
             this.tempScale = 0
         },
 
-        onPinchIn(){
+        onPinchIn() {
             //alert('pinchin:' + evt.scale)
             this.zoomOut()
         },
 
-        onPinchOut(){
+        onPinchOut() {
             this.zoomIn()
         },
 
-        attachEvents(){
-            if(this.panmode){
+        attachEvents() {
+            if (this.panmode) {
                 this.bindPanModeEvents()
-            }else{
+            } else {
                 this.bind360ModeEvents()
             }
         },
 
-        bindPanModeEvents(){
+        bindPanModeEvents() {
             this.$refs.viewport.removeEventListener('touchend', this.touchEnd);
             this.$refs.viewport.removeEventListener('touchstart', this.touchStart);
             this.$refs.viewport.removeEventListener('touchmove', this.touchMove);
@@ -569,7 +594,7 @@ export default {
             this.$refs.viewport.addEventListener('wheel', this.onScroll);
         },
 
-        bind360ModeEvents(){
+        bind360ModeEvents() {
             this.$refs.viewport.removeEventListener('touchend', this.stopDragging);
             this.$refs.viewport.removeEventListener('touchstart', this.startDragging);
             this.$refs.viewport.removeEventListener('touchmove', this.doDragging);
@@ -589,12 +614,12 @@ export default {
             this.$refs.viewport.addEventListener('wheel', this.onScroll);
         },
 
-        togglePanMode(){
+        togglePanMode() {
             this.panmode = !this.panmode
         },
 
         zoomIn() {
-            if(this.disableZoom) return;
+            if (this.disableZoom) return;
 
             this.lastX = this.centerX;
             this.lastY = this.centerY
@@ -602,7 +627,7 @@ export default {
         },
 
         zoomOut() {
-            if(this.disableZoom) return;
+            if (this.disableZoom) return;
 
             this.lastX = this.centerX;
             this.lastY = this.centerY
@@ -625,7 +650,7 @@ export default {
             this.currentTopPosition -= this.customOffset;
         },
 
-        resetPosition(){
+        resetPosition() {
             this.currentScale = 1
             this.activeImage = 1
             this.setImage(true)
@@ -636,12 +661,12 @@ export default {
 
             if (!cached) {
                 this.currentCanvasImage = new Image()
-                this.currentCanvasImage.crossOrigin='anonymous'
+                this.currentCanvasImage.crossOrigin = 'anonymous'
                 this.currentCanvasImage.src = this.currentImage
 
                 this.currentCanvasImage.onload = () => {
                     let viewportElement = this.$refs.viewport.getBoundingClientRect()
-                    this.canvas.width  = (this.isFullScreen) ? viewportElement.width : this.currentCanvasImage.width
+                    this.canvas.width = (this.isFullScreen) ? viewportElement.width : this.currentCanvasImage.width
                     this.canvas.height = (this.isFullScreen) ? viewportElement.height : this.currentCanvasImage.height
                     this.trackTransforms(this.ctx)
 
@@ -654,7 +679,7 @@ export default {
             } else {
                 this.currentCanvasImage = this.images[0]
                 let viewportElement = this.$refs.viewport.getBoundingClientRect()
-                this.canvas.width  = (this.isFullScreen) ? viewportElement.width : this.currentCanvasImage.width
+                this.canvas.width = (this.isFullScreen) ? viewportElement.width : this.currentCanvasImage.width
                 this.canvas.height = (this.isFullScreen) ? viewportElement.height : this.currentCanvasImage.height
                 this.trackTransforms(this.ctx)
 
@@ -665,18 +690,18 @@ export default {
 
         redraw() {
             try {
-                let p1 = this.ctx.transformedPoint(0,0);
-                let p2 = this.ctx.transformedPoint(this.canvas.width,this.canvas.height)
+                let p1 = this.ctx.transformedPoint(0, 0);
+                let p2 = this.ctx.transformedPoint(this.canvas.width, this.canvas.height)
 
                 let hRatio = this.canvas.width / this.currentCanvasImage.width
-                let vRatio =  this.canvas.height / this.currentCanvasImage.height
-                let ratio  = Math.min(hRatio, vRatio);
-                let centerShift_x = (this.canvas.width - this.currentCanvasImage.width*ratio )/2
-                let centerShift_y = (this.canvas.height - this.currentCanvasImage.height*ratio )/2
+                let vRatio = this.canvas.height / this.currentCanvasImage.height
+                let ratio = Math.min(hRatio, vRatio);
+                let centerShift_x = (this.canvas.width - this.currentCanvasImage.width * ratio) / 2
+                let centerShift_y = (this.canvas.height - this.currentCanvasImage.height * ratio) / 2
                 this.ctx.clearRect(p1.x, p1.y, p2.x - p1.x, p2.y - p1.y);
 
-                this.centerX = this.currentCanvasImage.width*ratio/2
-                this.centerY = this.currentCanvasImage.height*ratio/2
+                this.centerX = this.currentCanvasImage.width * ratio / 2
+                this.centerY = this.currentCanvasImage.height * ratio / 2
 
                 //center image
                 this.ctx.drawImage(
@@ -693,28 +718,28 @@ export default {
 
                 this.addHotspots();
                 this.addLayer();
-            } catch(e){
+            } catch (e) {
                 this.trackTransforms(this.ctx)
             }
 
         },
 
-        addHotspots(){
+        addHotspots() {
             this.clearHotspots()
 
             let currentImageHotspots = this.hotspots.filter(h => h.frame == this.activeImage)
 
-            for(let c in currentImageHotspots){
+            for (let c in currentImageHotspots) {
                 let hotspotElement = currentImageHotspots[c]
 
                 let hotspotPositionX, hotspotPositionY
 
-                if(this.canvas.width > this.$refs.viewport.clientWidth){
+                if (this.canvas.width > this.$refs.viewport.clientWidth) {
                     /* hotspotPositionX = hotspotElement.x * this.$refs.viewport.clientWidth * this.currentScale
                     hotspotPositionY = hotspotElement.y * this.$refs.viewport.clientHeight * this.currentScale */
                     hotspotPositionX = hotspotElement.x * this.$refs.viewport.clientWidth
                     hotspotPositionY = hotspotElement.y * this.$refs.viewport.clientHeight
-                }else{
+                } else {
                     hotspotPositionX = hotspotElement.x * this.canvas.width
                     hotspotPositionY = hotspotElement.y * this.canvas.height
                 }
@@ -740,7 +765,7 @@ export default {
                     this.openHotspotForm(true)
                 })
 
-                if(hotspotElement.action){
+                if (hotspotElement.action) {
                     console.log('add this function: ' + hotspotElement.action)
                 }
 
@@ -751,36 +776,36 @@ export default {
         },
 
         addLayer() {
-          if (this.currentLayerImage) {
-              let hRatio = this.canvas.width / this.currentLayerImage.width;
-              let vRatio =  this.canvas.height / this.currentLayerImage.height;
-              let ratio  = Math.min(hRatio, vRatio);
-              let centerShift_x = (this.canvas.width - this.currentLayerImage.width * ratio ) / 2;
-              let centerShift_y = (this.canvas.height - this.currentLayerImage.height * ratio ) / 2;
+            if (this.currentLayerImage) {
+                let hRatio = this.canvas.width / this.currentLayerImage.width;
+                let vRatio = this.canvas.height / this.currentLayerImage.height;
+                let ratio = Math.min(hRatio, vRatio);
+                let centerShift_x = (this.canvas.width - this.currentLayerImage.width * ratio) / 2;
+                let centerShift_y = (this.canvas.height - this.currentLayerImage.height * ratio) / 2;
 
-              //center image
-              this.ctx.drawImage(
-                  this.currentLayerImage,
-                  this.currentLeftPosition,
-                  this.currentTopPosition,
-                  this.currentLayerImage.width,
-                  this.currentLayerImage.height,
-                  centerShift_x,
-                  centerShift_y,
-                  this.currentLayerImage.width * ratio,
-                  this.currentLayerImage.height * ratio
-              );
-          }
+                //center image
+                this.ctx.drawImage(
+                    this.currentLayerImage,
+                    this.currentLeftPosition,
+                    this.currentTopPosition,
+                    this.currentLayerImage.width,
+                    this.currentLayerImage.height,
+                    centerShift_x,
+                    centerShift_y,
+                    this.currentLayerImage.width * ratio,
+                    this.currentLayerImage.height * ratio
+                );
+            }
         },
 
-        clearHotspots(){
+        clearHotspots() {
             let hotspotButtons = document.getElementById(this.identifier).querySelectorAll('.tooltip')
 
-            if(hotspotButtons.length)
+            if (hotspotButtons.length)
                 hotspotButtons.forEach(element => element.remove())
         },
 
-        onMove(pageX){
+        onMove(pageX) {
             if (pageX - this.movementStart >= this.speedFactor) {
                 let itemsSkippedRight = Math.floor((pageX - this.movementStart) / this.speedFactor) || 1;
 
@@ -810,29 +835,29 @@ export default {
             }
         },
 
-        startMoving(evt){
+        startMoving(evt) {
             this.movement = true
             this.movementStart = evt.pageX;
             this.$refs.viewport.style.cursor = 'grabbing';
         },
 
-        doMoving(evt){
-            if(this.movement){
+        doMoving(evt) {
+            if (this.movement) {
                 this.onMove(evt.clientX)
             }
         },
 
-        onScroll(evt){
+        onScroll(evt) {
             evt.preventDefault();
 
-            if(this.disableZoom || this.scrollImage){
-                if(evt.deltaY < 0){
+            if (this.disableZoom || this.scrollImage) {
+                if (evt.deltaY < 0) {
                     this.moveActiveIndexDown(1);
-                }else{
+                } else {
                     this.moveActiveIndexUp(1);
                 }
                 this.onMove(evt.scrollTop);
-            }else{
+            } else {
                 this.zoomImage(evt);
             }
         },
@@ -887,38 +912,38 @@ export default {
             this.redraw();
         },
 
-        stopMoving(){
+        stopMoving() {
             this.movement = false
             this.movementStart = 0
             this.$refs.viewport.style.cursor = 'grab'
         },
 
-        touchStart(evt){
+        touchStart(evt) {
             this.movementStart = evt.touches[0].clientX
         },
 
-        touchMove(evt){
+        touchMove(evt) {
             this.onMove(evt.touches[0].clientX)
         },
 
-        touchEnd(){
+        touchEnd() {
             this.movementStart = 0
         },
 
-        startDragging(evt){
+        startDragging(evt) {
             this.dragging = true
             document.body.style.mozUserSelect = document.body.style.webkitUserSelect = document.body.style.userSelect = 'none';
-            if  (this.isMobile) {
-              this.lastX = evt.touches[0].offsetX || (evt.touches[0].pageX - this.canvas.offsetLeft);
-              this.lastY = evt.touches[0].offsetY || (evt.touches[0].pageY - this.canvas.offsetTop);
-            } else  {
-              this.lastX = evt.offsetX || (evt.pageX - this.canvas.offsetLeft);
-              this.lastY = evt.offsetY || (evt.pageY - this.canvas.offsetTop);
+            if (this.isMobile) {
+                this.lastX = evt.touches[0].offsetX || (evt.touches[0].pageX - this.canvas.offsetLeft);
+                this.lastY = evt.touches[0].offsetY || (evt.touches[0].pageY - this.canvas.offsetTop);
+            } else {
+                this.lastX = evt.offsetX || (evt.pageX - this.canvas.offsetLeft);
+                this.lastY = evt.offsetY || (evt.pageY - this.canvas.offsetTop);
             }
-          this.dragStart = this.ctx.transformedPoint(this.lastX,this.lastY);
+            this.dragStart = this.ctx.transformedPoint(this.lastX, this.lastY);
         },
 
-        doDragging(evt){
+        doDragging(evt) {
             if (this.isMobile) {
                 this.lastX = evt.touches[0].offsetX || (evt.touches[0].pageX - this.canvas.offsetLeft);
                 this.lastY = evt.touches[0].offsetY || (evt.touches[0].pageY - this.canvas.offsetTop);
@@ -928,19 +953,19 @@ export default {
             }
 
             if (this.dragStart) {
-				let pt = this.ctx.transformedPoint(this.lastX,this.lastY);
-				this.ctx.translate(pt.x-this.dragStart.x,pt.y-this.dragStart.y);
+                let pt = this.ctx.transformedPoint(this.lastX, this.lastY);
+                this.ctx.translate(pt.x - this.dragStart.x, pt.y - this.dragStart.y);
                 //redraw();
                 this.redraw();
             }
         },
 
-        stopDragging(){
+        stopDragging() {
             this.dragging = false
             this.dragStart = null
         },
 
-        restrictScale(){
+        restrictScale() {
             let scale = this.currentScale;
 
             if (scale < this.minScale) {
@@ -952,55 +977,70 @@ export default {
             return scale;
         },
 
-        zoom(clicks){
+        zoom(clicks) {
             //console.log(this.lastX + ' - ' + this.lastY)
-            let factor = Math.pow(1.01,clicks);
+            let factor = Math.pow(1.01, clicks);
             //console.log(factor)
 
-            if(factor > 1){
+            if (factor > 1) {
                 this.currentScale += factor
-            }else{
-                if(this.currentScale-factor > 1)
+            } else {
+                if (this.currentScale - factor > 1)
                     this.currentScale -= factor
                 else
                     this.currentScale = 1
             }
 
-            if(this.currentScale > 1){
-                let pt = this.ctx.transformedPoint(this.lastX,this.lastY);
-                this.ctx.translate(pt.x,pt.y);
+            if (this.currentScale > 1) {
+                let pt = this.ctx.transformedPoint(this.lastX, this.lastY);
+                this.ctx.translate(pt.x, pt.y);
 
                 //console.log(this.currentScale)
-                this.ctx.scale(factor,factor);
-                this.ctx.translate(-pt.x,-pt.y);
+                this.ctx.scale(factor, factor);
+                this.ctx.translate(-pt.x, -pt.y);
                 this.redraw();
             }
         },
 
-        zoomImage(evt){
-            if(this.disableZoom) return;
+        zoomImage(evt) {
+            if (this.disableZoom) return;
 
             this.lastX = evt.offsetX || (evt.pageX - this.canvas.offsetLeft);
             this.lastY = evt.offsetY || (evt.pageY - this.canvas.offsetTop);
 
-            var delta = evt.wheelDelta ? evt.wheelDelta/40 : evt.deltaY ? -evt.deltaY : 0;
+            var delta = evt.wheelDelta ? evt.wheelDelta / 40 : evt.deltaY ? -evt.deltaY : 0;
 
-			if (delta) this.zoom(delta);
+            if (delta) this.zoom(delta);
             return evt.preventDefault() && false;
 
         },
 
-        trackTransforms(ctx){
+        inPlaceZoom(e) {
+            const zoomer = e.currentTarget;
+            let offsetX = 0;
+            let offsetY = 0;
+
+            e.offsetX ? offsetX = e.offsetX : offsetX = e.touches[0].pageX
+            e.offsetY ? offsetY = e.offsetY : offsetX = e.touches[0].pageX
+            const x = offsetX / zoomer.offsetWidth * 100;
+            const y = offsetY / zoomer.offsetHeight * 100;
+
+            zoomer.style.backgroundPosition = x + '% ' + y + '%';
+        },
+
+        trackTransforms(ctx) {
 
             return new Promise(resolve => {
-                var svg = document.createElementNS("http://www.w3.org/2000/svg",'svg');
+                var svg = document.createElementNS("http://www.w3.org/2000/svg", 'svg');
                 var xform = svg.createSVGMatrix();
-                this.ctx.getTransform = function(){ return xform; };
+                this.ctx.getTransform = function () {
+                    return xform;
+                };
 
                 var savedTransforms = [];
                 var save = ctx.save;
                 this.ctx.save = () => {
-                    savedTransforms.push(xform.translate(0,0));
+                    savedTransforms.push(xform.translate(0, 0));
                     return save.call(this.ctx);
                 };
                 var restore = ctx.restore;
@@ -1010,40 +1050,46 @@ export default {
                 };
 
                 var scale = this.ctx.scale;
-                this.ctx.scale = (sx,sy) => {
-                    xform = xform.scaleNonUniform(sx,sy);
-                    return scale.call(this.ctx,sx,sy);
+                this.ctx.scale = (sx, sy) => {
+                    xform = xform.scaleNonUniform(sx, sy);
+                    return scale.call(this.ctx, sx, sy);
                 };
                 var rotate = this.ctx.rotate;
                 this.ctx.rotate = (radians) => {
-                    xform = xform.rotate(radians*180/Math.PI);
-                    return rotate.call(this.ctx,radians);
+                    xform = xform.rotate(radians * 180 / Math.PI);
+                    return rotate.call(this.ctx, radians);
                 };
                 var translate = this.ctx.translate;
-                this.ctx.translate = (dx,dy) => {
-                    xform = xform.translate(dx,dy);
-                    return translate.call(this.ctx,dx,dy);
+                this.ctx.translate = (dx, dy) => {
+                    xform = xform.translate(dx, dy);
+                    return translate.call(this.ctx, dx, dy);
                 };
                 var transform = this.ctx.transform;
-                this.ctx.transform = (a,b,c,d,e,f) => {
+                this.ctx.transform = (a, b, c, d, e, f) => {
                     var m2 = svg.createSVGMatrix();
-                    m2.a=a; m2.b=b; m2.c=c; m2.d=d; m2.e=e; m2.f=f;
+                    m2.a = a;
+                    m2.b = b;
+                    m2.c = c;
+                    m2.d = d;
+                    m2.e = e;
+                    m2.f = f;
                     xform = xform.multiply(m2);
-                    return transform.call(this.ctx,a,b,c,d,e,f);
+                    return transform.call(this.ctx, a, b, c, d, e, f);
                 };
                 var setTransform = this.ctx.setTransform;
-                this.ctx.setTransform = (a,b,c,d,e,f) => {
+                this.ctx.setTransform = (a, b, c, d, e, f) => {
                     xform.a = a;
                     xform.b = b;
                     xform.c = c;
                     xform.d = d;
                     xform.e = e;
                     xform.f = f;
-                    return setTransform.call(this.ctx,a,b,c,d,e,f);
+                    return setTransform.call(this.ctx, a, b, c, d, e, f);
                 };
-                var pt  = svg.createSVGPoint();
-                this.ctx.transformedPoint = (x,y) => {
-                    pt.x=x; pt.y=y;
+                var pt = svg.createSVGPoint();
+                this.ctx.transformedPoint = (x, y) => {
+                    pt.x = x;
+                    pt.y = y;
                     return pt.matrixTransform(xform.inverse());
                 }
 
@@ -1052,7 +1098,7 @@ export default {
 
         },
 
-        toggleFullScreen(){
+        toggleFullScreen() {
             this.isFullScreen = !this.isFullScreen
         },
     }
@@ -1065,197 +1111,195 @@ export default {
 }
 
 .v360-main {
-  width: 100%;
-  height: 100%;
-  max-width: 1024px;
-  margin: 20px auto;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: stretch;
-  align-content: stretch;
+    width: 100%;
+    height: 100%;
+    max-width: 1024px;
+    margin: 20px auto;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    align-content: stretch;
 }
 
 /* HEADER */
 
 .v360-header {
-  /* width: calc(100% - 20px); */
-  background-color: #000;
-  padding: 10px;
-  color: #FFFFFF;
-  font-size: 1.5em;
-  text-align: center;
-  font-weight: bold;
-  /* text-shadow: 1px 1px #000000; */
-  flex: 0 1 auto;
+    /* width: calc(100% - 20px); */
+    background-color: #000;
+    padding: 10px;
+    color: #FFFFFF;
+    font-size: 1.5em;
+    text-align: center;
+    font-weight: bold;
+    /* text-shadow: 1px 1px #000000; */
+    flex: 0 1 auto;
 }
 
 /* VIEWER */
 
 #productInsert {
-  background-color: #FFF;
-  width: 100%;
-  height: calc(100vh - 184px);
-  max-height: 768px;
-  position: relative;
-  overflow: hidden;
+    background-color: #FFF;
+    width: 100%;
+    height: calc(100vh - 184px);
+    max-height: 768px;
+    position: relative;
+    overflow: hidden;
 }
 
 .v360-fullscreen #productInsert {
-  height: 100vh;
-  max-height: none;
+    height: 100vh;
+    max-height: none;
 }
 
 #viewport-wrapper {
-  width: 100%;
-  height: calc(100% - 10px);
-  margin: 5px auto;
-  position: absolute;
-  left: 0;
-  transition: width 0.3s ease;
+    width: 100%;
+    height: calc(100% - 10px);
+    margin: 5px auto;
+    position: absolute;
+    left: 0;
+    transition: width 0.3s ease;
 }
+
 .v360-viewport {
-  background-color: #FFF;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  /* position: absolute; */
-  left: 0;
-  /* transition: width 0.3s ease; */
-  display: flex;
-  justify-content: center;
-  align-items: center;
+    background-color: #FFF;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    /* position: absolute; */
+    left: 0;
+    /* transition: width 0.3s ease; */
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 #viewport-wrapper.wide {
-  width: 100%;
+    width: 100%;
 }
 
 .v360-viewport iframe {
-  width: 100%;
-  height: 100%;
-  position: relative;
-  /* left: 50%;
-  -webkit-transform: translateX(-50%) translateY(0);
-  -ms-transform: translateX(-50%) translateY(0);
-  transform: translateX(-50%) translateY(0);
-  transform-origin: center center; */
+    width: 100%;
+    height: 100%;
+    position: relative;
+    /* left: 50%;
+    -webkit-transform: translateX(-50%) translateY(0);
+    -ms-transform: translateX(-50%) translateY(0);
+    transform: translateX(-50%) translateY(0);
+    transform-origin: center center; */
 }
 
 .v360-viewport img {
-  position: relative;
+    position: relative;
 }
 
 
 /* FULLSCREEN & MENU TOGGLE BUTTONS */
 
-.v360-fullscreen-toggle{
-  width: 30px;
-  height: 30px;
-  margin: 15px;
-  position: absolute;
-  /* color: #999;
-  fill: #999; */
-  float: right;
-  cursor: pointer;
-  top: 0;
-  right: 0;
-  z-index: 150;
+.v360-fullscreen-toggle {
+    width: 30px;
+    height: 30px;
+    margin: 15px;
+    position: absolute;
+    /* color: #999;
+    fill: #999; */
+    float: right;
+    cursor: pointer;
+    top: 0;
+    right: 0;
+    z-index: 200;
 }
 
 .v360-fullscreen-toggle:hover {
-  fill: #000;
+    fill: #000;
 }
-/*
-.v360-fullscreen-toggle div:last-child {
-    display: none;
-} */
 
 .v360-fullscreen {
-  z-index: 9999;
-  width: 100%;
-  max-width: none;
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  position: fixed;
-  top: 0;
-  left: 0;
+    z-index: 9999;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
 }
 
 .v360-fullscreen .v360-header,
 .v360-fullscreen #v360-menu-btns {
-  border-radius: 0;
+    border-radius: 0;
 }
 
 .v360-fullscreen productInsert {
-  height: calc(100vh - 95px);
-  max-height: none;
+    height: calc(100vh - 95px);
+    max-height: none;
 }
 
 .ui-accordion-header {
-  background-color: #B0BEC5;
-  outline: none;
-  line-height: 1.5em;
-  transition: all 0.3s ease;
+    background-color: #B0BEC5;
+    outline: none;
+    line-height: 1.5em;
+    transition: all 0.3s ease;
 }
 
 .ui-accordion-header:hover,
 .ui-accordion-header.ui-state-active {
-  background-color: #607D8B;
-  color: #FFF;
+    background-color: #607D8B;
+    color: #FFF;
 }
 
 /* MENU BUTTONS */
 
 #v360-menu-btns {
-  width: 100%;
-  padding: 5px 0;
-  text-align: center;
-  /* position: absolute; */
-  bottom: 0;
-  display: flex;
-  justify-content: center;
-  z-index: 150;
+    width: 100%;
+    padding: 5px 0;
+    text-align: center;
+    /* position: absolute; */
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    z-index: 150;
 }
 
-.light{
-  background-color: #fff !important;
+.light {
+    background-color: #fff !important;
 }
 
-.dark{
-  background-color: #000 !important;
+.dark {
+    background-color: #000 !important;
 }
 
 .v360-menu-btns {
-  /* background-color: #999; */
-  width: auto;
-  min-height: 20px;
-  margin: 5px 5px;
-  padding: 5px 10px;
-  border-radius: 5px;
-  outline: none;
-  font-size: 1.3em;
-  text-align: center;
-  line-height: 1em;
-  cursor: pointer;
-  user-select: none;
-  position: relative;
-  display: inline-block;
-  opacity: 1;
+    /* background-color: #999; */
+    width: auto;
+    min-height: 20px;
+    margin: 5px 5px;
+    padding: 5px 10px;
+    border-radius: 5px;
+    outline: none;
+    font-size: 1.3em;
+    text-align: center;
+    line-height: 1em;
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    display: inline-block;
+    opacity: 1;
 }
+
 /*
 .v360-btn-active{
     background-color: #000;
 } */
 
 .light .v360-menu-btns {
-  color: #000;
+    color: #000;
 }
 
 .dark .v360-menu-btns {
-  color: #fff;
+    color: #fff;
 }
 
 /* .light .v360-btn-active{
@@ -1263,112 +1307,114 @@ export default {
 } */
 
 .light .v360-menu-btns:hover {
-  color: #fff;
-  background-color: #000;
+    color: #fff;
+    background-color: #000;
 }
 
 .dark .v360-menu-btns:hover {
-  color: #000;
-  background-color: #fff;
+    color: #000;
+    background-color: #fff;
 }
 
 .v360-main {
-  filter: alpha(opacity=50);
-  /* opacity: 0.5; */
-  cursor: default;
-  /* pointer-events: none; */
+    filter: alpha(opacity=50);
+    /* opacity: 0.5; */
+    cursor: default;
+    /* pointer-events: none; */
 }
 
 #v360-image-container {
-  width: 100%;
-  height: 100%;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: contain;
-  position: relative;
+    width: 100%;
+    height: 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    position: relative;
 }
 
 .v360-image-container {
-  width: 100%;
-  height: 100%;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: contain;
-  position: relative;
+    width: 100%;
+    height: 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    position: relative;
 }
 
-.v360-product-box-shadow{
-  position: absolute;
-  /* z-index: 99; */
-  top: 0px;
-  left: 0px;
-  right: 0px;
-  bottom: 0px;
-  box-shadow: rgb(34, 34, 34) 0px 0px 100px inset;
+.v360-product-box-shadow {
+    position: absolute;
+    /* z-index: 99; */
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    box-shadow: rgb(34, 34, 34) 0px 0px 100px inset;
 }
 
-.v360-fullscreen-toggle-btn i{
-  /* background-color: #fff; */
-  font-size: 20px;
+.v360-toggle-btn i {
+    /* background-color: #fff; */
+    font-size: 20px;
 }
-.v360-spinner-grow{
-  display: inline-block;
-  width: 2rem;
-  height: 2rem;
-  vertical-align: text-bottom;
-  background-color: rgb(33, 37, 41);
-  border-radius: 50%;
-  opacity: 0;
-  -webkit-animation: spinner-grow .75s linear infinite;
-  animation: spinner-grow .75s linear infinite;
+
+.v360-spinner-grow {
+    display: inline-block;
+    width: 2rem;
+    height: 2rem;
+    vertical-align: text-bottom;
+    background-color: rgb(33, 37, 41);
+    border-radius: 50%;
+    opacity: 0;
+    -webkit-animation: spinner-grow .75s linear infinite;
+    animation: spinner-grow .75s linear infinite;
 }
-.v360-percentage-description{
-  margin-left: 2rem;
+
+.v360-percentage-description {
+    margin-left: 2rem;
 }
 
 
 /* Tooltip */
 
 .tooltip {
-  position: relative;
-  display: inline-block;
+    position: relative;
+    display: inline-block;
 }
 
 .tooltip .tooltiptext {
-  visibility: hidden;
-  width: 120px;
-  background-color: #555;
-  color: #fff;
-  text-align: center;
-  border-radius: 6px;
-  padding: 5px 0;
-  position: absolute;
-  z-index: 1;
-  bottom: 125%;
-  left: 50%;
-  margin-left: -60px;
-  opacity: 0;
-  transition: opacity 0.3s;
+    visibility: hidden;
+    width: 120px;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -60px;
+    opacity: 0;
+    transition: opacity 0.3s;
 }
 
 .tooltip .tooltiptext::after {
-  content: "";
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  margin-left: -5px;
-  border-width: 5px;
-  border-style: solid;
-  border-color: #555 transparent transparent transparent;
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #555 transparent transparent transparent;
 }
 
 .tooltip:hover .tooltiptext {
-  visibility: visible;
-  opacity: 1;
+    visibility: visible;
+    opacity: 1;
 }
 
-.tooltip{
-  opacity: 1 !important;
+.tooltip {
+    opacity: 1 !important;
 }
 
 /* .hotspot-button{
@@ -1383,8 +1429,8 @@ export default {
     width: 100%; /* Full width */
     height: 100%; /* Full height */
     overflow: auto; /* Enable scroll if needed */
-    background-color: rgb(0,0,0); /* Fallback color */
-    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    background-color: rgb(0, 0, 0); /* Fallback color */
+    background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
 }
 
 /* Modal Content/Box */
@@ -1424,5 +1470,39 @@ export default {
     position: absolute;
     left: 0;
     top: 0;
+}
+
+figure.zoom {
+    background-position: 50% 50%;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    cursor: move;
+    z-index: 200;
+}
+
+figure.zoom img {
+    transition: opacity .5s;
+    display: block;
+    width: 100%;
+    opacity: 0;
+}
+
+.mobile-zoom-container {
+    overflow: scroll;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    z-index: 200;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.mobile-zoom-container::-webkit-scrollbar {
+    display: none;
+}
+
+.mobile-toggle-zoom {
+    margin-top: 24px;
 }
 </style>

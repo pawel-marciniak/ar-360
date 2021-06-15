@@ -13,6 +13,7 @@
                 :layer-file-name="layerFileName"
                 :big-previews="true"
                 :spin-reverse="true"
+                :disable-zoom="true"
                 big-image-path="/images/Solar99/Zoom"
                 big-file-name="Solar99_Zoom_{index}.jpg"
             />
@@ -85,6 +86,7 @@ export default {
     flex-direction: row;
     width: 60%;
     margin: 0 auto;
+    box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
 }
 
 @media screen and (max-width: 1290px) {
@@ -93,22 +95,25 @@ export default {
     }
 }
 
+.wrapper .component {
+    flex-shrink: 1;
+    border-right: 1px solid lightgrey;
+}
 
 @media screen and (max-width: 768px) {
     .wrapper {
         flex-direction: column;
     }
-}
 
-.wrapper .component {
-    border: 1px solid grey;
-    flex-shrink: 1;
+    .wrapper .component {
+        border-right: none;
+        border-bottom: 1px solid lightgrey;
+    }
 }
 
 .wrapper .configurator {
-    border: 1px solid grey;
     flex-grow: 1;
-    padding: 0 36px 36px 0;
+    padding: 0 36px 36px 36px;
 }
 
 .pillows {
