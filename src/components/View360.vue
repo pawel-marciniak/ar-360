@@ -1,111 +1,121 @@
 <template>
-    <div>
-        <!-- 360 Viewer Container -->
-        <div class="v360-viewer-container" ref="viewerContainer" :id="identifier">
-            <div v-show="showImagePreview"
-                 ref="mobileZoomContainer"
-                 class="mobile-zoom-container"
-            >
-                <img :src="currentImagePreview"/>
-            </div>
+    <!-- 360 Viewer Container -->
+    <div class="v360-viewer-container" ref="viewerContainer" :id="identifier">
+        <div v-show="showImagePreview"
+             ref="mobileZoomContainer"
+             class="mobile-zoom-container"
+        >
+            <img :src="currentImagePreview"/>
 
-            <!-- 360 Viewer Header -->
-            <slot name="header"></slot>
-            <!--/ 360 Viewer Header -->
-
-            <!-- Percentage Loader -->
-            <div class="v360-viewport" v-if="!imagesLoaded">
-                <div class="v360-spinner-grow"></div>
-                <p ref="viewPercentage" class="v360-percentage-text"></p>
-            </div>
-            <!--/ Percentage Loader -->
-
-            <!-- 360 viewport -->
-            <div class="v360-viewport" ref="viewport">
-                <canvas
-                    class="v360-image-container"
-                    ref="imageContainer"
-                    v-hammer:tap="!isMobile && showBigPreview"
-                    v-hammer:pinch="onPinch"
-                    v-hammer:pinchend="onPinch"
-                    v-hammer:pinchout="onPinchOut"
-                    v-hammer:pinchin="onPinchIn"
-                ></canvas>
-                <div class="v360-product-box-shadow"
-                     v-if="boxShadow"
-                     v-hammer:pinch="onPinch"
-                     v-hammer:pinchend="onPinch"
-                     v-hammer:pinchout="onPinchOut"
-                     v-hammer:pinchin="onPinchIn"
-                ></div>
-
-                <figure v-show="showImagePreview && !isMobile"
-                        ref="zoomContainer"
-                        class="zoom"
-                        :style="`background-image: url(${currentImagePreview})`"
-                        style="background-position: 50% 50%"
-                        @mousemove="inPlaceZoom($event)"
-                        @click="showImagePreview = false"
-                >
-                    <img :src="currentImagePreview" />
-                </figure>
-            </div>
-            <!--/ 360 viewport -->
-
-            <!-- Fullscreen Button -->
-            <abbr>
-                <div class="v360-fullscreen-toggle text-center">
-                    <div v-show="!showImagePreview"
-                         class="v360-toggle-btn"
-                         :class="(buttonClass === 'dark') ? 'text-light' : 'text-dark'"
-                         @click="toggleFullScreen"
-                    >
-                        <i :class="(!isFullScreen) ? 'fas fa-expand text-lg' : 'fas fa-compress text-lg'"></i>
-                    </div>
-
-                    <div v-if="isMobile"
-                         class="v360-toggle-btn mobile-toggle-zoom"
-                         :class="(buttonClass === 'dark') ? 'text-light' : 'text-dark'"
-                         @click="showImagePreview ? (showImagePreview = false) : showBigPreview($event)"
-                    >
-                        <i :class="(!showImagePreview) ? 'fas fa-search-plus text-lg' : 'fas fa-search-minus text-lg'"></i>
-                    </div>
-                </div>
-            </abbr>
-            <!--/ Fullscreen Button -->
-
-            <!-- Buttons Container -->
-            <div v-if="showButtons" id="v360-menu-btns" :class="buttonClass">
-                <div class="v360-navigate-btns">
-                    <div class="v360-menu-btns" @click="togglePlay" :class="(playing) ? 'v360-btn-active' : ''">
-                        <i class="fa fa-play" v-if="!playing"></i>
-                        <i class="fa fa-pause" v-else></i>
-                    </div>
-                    <div class="v360-menu-btns" @click="zoomIn" v-if="!disableZoom">
-                        <i class="fa fa-search-plus"></i>
-                    </div>
-                    <div class="v360-menu-btns" @click="zoomOut" v-if="!disableZoom">
-                        <i class="fa fa-search-minus"></i>
-                    </div>
-                    <div class="v360-menu-btns" @click="togglePanMode" :class="(panmode) ? 'v360-btn-active' : ''">
-                        <i class="fa fa-hand-paper" v-if="!panmode"></i>
-                        <span v-else>360&deg;</span>
-                    </div>
-                    <div class="v360-menu-btns" @click="prev">
-                        <i class="fa fa-chevron-left"></i>
-                    </div>
-                    <div class="v360-menu-btns" @click="next">
-                        <i class="fa fa-chevron-right"></i>
-                    </div>
-                    <div class="v360-menu-btns" @click="resetPosition">
-                        <i class="fa fa-sync"></i>
-                    </div>
-                </div>
-            </div>
-            <!--/ Buttons Container -->
+            <img v-for="(layersPreview, index) in reversedLayersPreviews"
+                 :key="layersPreview"
+                 :src="layersPreview"
+                 class="mobile-preview-layer"
+                 :style="{ zIndex: index + 1 }"
+            />
         </div>
-        <!--/ 360 Viewer Container -->
+
+        <!-- 360 Viewer Header -->
+        <slot name="header"></slot>
+        <!--/ 360 Viewer Header -->
+
+        <!-- Percentage Loader -->
+        <div class="v360-viewport" v-if="!imagesLoaded">
+<!--                <div class="v360-spinner-grow"></div>-->
+            <i class="fas fa-circle-notch fa-spin loading-spinner"></i>
+<!--                <p ref="viewPercentage" class="v360-percentage-text">{{ loadingPercentage }}</p>-->
+        </div>
+        <!--/ Percentage Loader -->
+
+        <!-- 360 viewport -->
+        <div class="v360-viewport" ref="viewport">
+            <canvas
+                class="v360-image-container"
+                ref="imageContainer"
+                v-hammer:tap="!isMobile && showBigPreview"
+                v-hammer:pinch="onPinch"
+                v-hammer:pinchend="onPinch"
+                v-hammer:pinchout="onPinchOut"
+                v-hammer:pinchin="onPinchIn"
+            ></canvas>
+            <div class="v360-product-box-shadow"
+                 v-if="boxShadow"
+                 v-hammer:pinch="onPinch"
+                 v-hammer:pinchend="onPinch"
+                 v-hammer:pinchout="onPinchOut"
+                 v-hammer:pinchin="onPinchIn"
+            ></div>
+
+            <figure v-show="showImagePreview && !isMobile"
+                    ref="zoomContainer"
+                    class="zoom"
+                    :style="{ backgroundImage: previewBackground }"
+                    style="background-position: 50% 50%"
+                    @mousemove="inPlaceZoom($event)"
+                    @click="showImagePreview = false"
+            >
+                <img :src="currentImagePreview" />
+                <img v-for="layersPreview in layersPreviews"
+                     :key="layersPreview"
+                     :src="layersPreview"
+                />
+            </figure>
+        </div>
+        <!--/ 360 viewport -->
+
+        <!-- Fullscreen Button -->
+        <abbr>
+            <div class="v360-fullscreen-toggle text-center">
+                <div v-show="!showImagePreview"
+                     class="v360-toggle-btn"
+                     :class="(buttonClass === 'dark') ? 'text-light' : 'text-dark'"
+                     @click="toggleFullScreen"
+                >
+                    <i :class="(!isFullScreen) ? 'fas fa-expand text-lg' : 'fas fa-compress text-lg'"></i>
+                </div>
+
+                <div v-if="isMobile"
+                     class="v360-toggle-btn mobile-toggle-zoom"
+                     :class="(buttonClass === 'dark') ? 'text-light' : 'text-dark'"
+                     @click="showImagePreview ? (showImagePreview = false) : showBigPreview($event)"
+                >
+                    <i :class="(!showImagePreview) ? 'fas fa-search-plus text-lg' : 'fas fa-search-minus text-lg'"></i>
+                </div>
+            </div>
+        </abbr>
+        <!--/ Fullscreen Button -->
+
+        <!-- Buttons Container -->
+        <div v-if="showButtons" id="v360-menu-btns" :class="buttonClass">
+            <div class="v360-navigate-btns">
+                <div class="v360-menu-btns" @click="togglePlay" :class="(playing) ? 'v360-btn-active' : ''">
+                    <i class="fa fa-play" v-if="!playing"></i>
+                    <i class="fa fa-pause" v-else></i>
+                </div>
+                <div class="v360-menu-btns" @click="zoomIn" v-if="!disableZoom">
+                    <i class="fa fa-search-plus"></i>
+                </div>
+                <div class="v360-menu-btns" @click="zoomOut" v-if="!disableZoom">
+                    <i class="fa fa-search-minus"></i>
+                </div>
+                <div class="v360-menu-btns" @click="togglePanMode" :class="(panmode) ? 'v360-btn-active' : ''">
+                    <i class="fa fa-hand-paper" v-if="!panmode"></i>
+                    <span v-else>360&deg;</span>
+                </div>
+                <div class="v360-menu-btns" @click="prev">
+                    <i class="fa fa-chevron-left"></i>
+                </div>
+                <div class="v360-menu-btns" @click="next">
+                    <i class="fa fa-chevron-right"></i>
+                </div>
+                <div class="v360-menu-btns" @click="resetPosition">
+                    <i class="fa fa-sync"></i>
+                </div>
+            </div>
+        </div>
+        <!--/ Buttons Container -->
     </div>
+    <!--/ 360 Viewer Container -->
 </template>
 
 <script>
@@ -139,15 +149,10 @@ export default {
             require: false,
             default: ''
         },
-        layerImagePath: {
-            type: String,
+        layers: {
+            type: Array,
             require: false,
-            default: ''
-        },
-        layerFileName: {
-            type: String,
-            require: false,
-            default: ''
+            default: () => []
         },
         indexFrom: {
             type: Number,
@@ -238,7 +243,7 @@ export default {
             lastX: 0,
             lastY: 0,
             currentCanvasImage: null,
-            currentLayerImage: null,
+            currentLayerImage: [],
             isFullScreen: false,
             viewPortElementWidth: null,
             movementStart: 0,
@@ -261,10 +266,49 @@ export default {
             layerImageData: [],
             playing: false,
             currentImagePreview: null,
-            showImagePreview: false
+            layersPreviews: [],
+            showImagePreview: false,
+            loadingPercentage: '0 %',
         }
     },
+
+    computed: {
+        previewBackground() {
+            let previewBackground = '';
+            const layersPreviews = this.layersPreviews;
+
+            layersPreviews.reverse().forEach((layerPreview, index) => {
+                if (index === 0) {
+                    previewBackground += `url(${layerPreview})`;
+                } else {
+                    previewBackground += `, url(${layerPreview})`;
+                }
+            });
+
+            if (previewBackground === '') {
+                previewBackground += `url(${this.currentImagePreview})`
+            } else {
+                previewBackground += `, url(${this.currentImagePreview})`
+            }
+
+            return previewBackground;
+        },
+        reversedLayersPreviews() {
+            const layersPreviews = [...this.layersPreviews];
+
+            return layersPreviews.reverse();
+        }
+    },
+
     watch: {
+        imagePath() {
+            this.fetchData();
+            this.update();
+        },
+        fileName() {
+            this.fetchData();
+            this.update();
+        },
         currentLeftPosition() {
             this.redraw()
         },
@@ -301,20 +345,22 @@ export default {
                 this.stop()
             }
         },
-        layerImagePath() {
-            this.fetchLayerData();
-            this.update();
-        },
-        layerFileName() {
-            this.fetchLayerData();
-            this.update();
+        layers: {
+            handler: function () {
+                this.layers.forEach((value, index) => {
+                    this.fetchLayerData(value, index);
+                });
+
+                this.update();
+            },
+            deep: true,
         }
     },
 
     mounted() {
         //this.toggleFullScreen()
         this.fetchData();
-        this.fetchLayerData();
+        // this.fetchLayerData();
         document.addEventListener('fullscreenchange', this.exitHandler);
         document.addEventListener('webkitfullscreenchange', this.exitHandler);
         document.addEventListener('mozfullscreenchange', this.exitHandler);
@@ -326,6 +372,16 @@ export default {
             if (this.bigPreviews) {
                 const imageIndex = (this.paddingIndex) ? this.lpad((this.activeImage - 1), "0", this.paddingSize) : (this.activeImage - 1);
                 const fileName = this.bigFileName.replace('{index}', imageIndex);
+
+                this.layersPreviews = [];
+
+                this.layers.forEach((layer, index) => {
+                    if (layer) {
+                        const layerFileName = layer.bigFileName.replace('{index}', imageIndex);
+
+                        this.$set(this.layersPreviews, index, `${layer.bigImagePath}/${layerFileName}`);
+                    }
+                });
 
                 this.currentImagePreview = `${this.bigImagePath}/${fileName}`;
                 this.showImagePreview = true;
@@ -344,28 +400,31 @@ export default {
                     let offsetX = this.$refs.viewport.offsetWidth / 2;
                     let offsetY = this.$refs.viewport.offsetHeight / 2;
 
-                    this.$refs.mobileZoomContainer.scrollTo(offsetX, offsetY);
-
                     setTimeout(() => {
                         this.$refs.mobileZoomContainer.scrollTo(1500, 1000);
-                    }, 200);
+                    }, 500);
                 }
             }
         },
         initData() {
-            this.checkMobile()
-            this.loadInitialImage()
+            this.checkMobile();
+            this.loadInitialImage();
 
-            this.canvas = this.$refs.imageContainer
-            this.ctx = this.canvas.getContext('2d')
+            this.canvas = this.$refs.imageContainer;
+            this.ctx = this.canvas.getContext('2d');
             this.attachEvents();
-            window.addEventListener('resize', this.resizeWindow);
-            this.resizeWindow()
+            // window.addEventListener('resize', this.resizeWindow);
+            // this.resizeWindow();
 
-            this.playing = this.autoplay
+            this.playing = this.autoplay;
         },
 
         fetchData() {
+            this.imagesLoaded = false;
+            this.imageData = [];
+            this.images = [];
+            this.loadedImages = 0;
+
             for (let i = this.indexFrom; i <= (this.amount + (this.indexFrom - 1)); i++) {
                 const imageIndex = (this.paddingIndex) ? this.lpad(i, "0", this.paddingSize) : i
                 const fileName = this.fileName.replace('{index}', imageIndex);
@@ -376,18 +435,19 @@ export default {
             this.preloadImages()
         },
 
-        fetchLayerData() {
-            this.layerImageData = [];
+        fetchLayerData(layerData, index) {
+            this.layerImageData[index] = [];
+            this.layerImages[index] = [];
 
-            if (this.layerImagePath && this.layerFileName) {
+            if (layerData?.imagePath && layerData?.fileName) {
                 for (let i = this.indexFrom; i <= (this.amount + (this.indexFrom - 1)); i++) {
                     const imageIndex = (this.paddingIndex) ? this.lpad(i, "0", this.paddingSize) : i
-                    const fileName = this.layerFileName.replace('{index}', imageIndex);
-                    const filePath = `${this.layerImagePath}/${fileName}`;
-                    this.layerImageData.push(filePath);
+                    const fileName = layerData.fileName.replace('{index}', imageIndex);
+                    const filePath = `${layerData.imagePath}/${fileName}`;
+                    this.layerImageData[index].push(filePath);
                 }
 
-                this.preloadLayerImages();
+                this.preloadLayerImages(index);
             }
         },
 
@@ -409,23 +469,24 @@ export default {
                     console.error(`Something went wrong while loading images: ${error.message}`);
                 }
             } else {
-                console.log('No Images Found')
+                console.error('No Images Found')
             }
         },
 
-        preloadLayerImages() {
-            if (this.layerImageData.length) {
+        preloadLayerImages(index) {
+            this.layerImages[index] = [];
+
+            if (this.layerImageData[index].length) {
                 try {
-                    this.layerImages = [];
                     // this.amount = this.layerImageData.length;
-                    this.layerImageData.forEach(src => {
-                        this.addLayerImage(src);
+                    this.layerImageData[index].forEach(src => {
+                        this.addLayerImage(src, index);
                     });
                 } catch (error) {
                     console.error(`Something went wrong while loading images: ${error.message}`);
                 }
             } else {
-                console.log('No Images Found')
+                console.error('No Images Found')
             }
         },
 
@@ -440,12 +501,12 @@ export default {
             this.images.push(image);
         },
 
-        addLayerImage(resultSrc) {
+        addLayerImage(resultSrc, index) {
             const image = new Image();
 
             image.src = resultSrc;
 
-            this.layerImages.push(image);
+            this.layerImages[index].push(image);
         },
 
         onImageLoad(event) {
@@ -471,13 +532,12 @@ export default {
                 this.view360Icon.innerText = percentage + '%';
             } */
 
-            this.$refs.viewPercentage.innerHTML = percentage + '%';
-            //console.log(percentage + '%')
+            this.loadingPercentage = percentage + '%';
         },
 
         onAllImagesLoaded() {
-            this.imagesLoaded = true
-            this.initData()
+            this.imagesLoaded = true;
+            this.initData();
         },
 
         togglePlay() {
@@ -541,12 +601,12 @@ export default {
         },
 
         loadInitialImage() {
-            this.currentImage = this.imageData[0]
-            this.setImage()
+            this.currentImage = this.imageData[this.activeImage - 1];
+            this.setImage();
         },
 
         resizeWindow() {
-            this.setImage()
+            // this.setImage();
         },
 
         onPinch() {
@@ -660,21 +720,21 @@ export default {
             this.currentLeftPosition = this.currentTopPosition = 0
 
             if (!cached) {
-                this.currentCanvasImage = new Image()
-                this.currentCanvasImage.crossOrigin = 'anonymous'
-                this.currentCanvasImage.src = this.currentImage
+                this.currentCanvasImage = new Image();
+                this.currentCanvasImage.crossOrigin = 'anonymous';
+                this.currentCanvasImage.src = this.currentImage;
 
                 this.currentCanvasImage.onload = () => {
-                    let viewportElement = this.$refs.viewport.getBoundingClientRect()
-                    this.canvas.width = (this.isFullScreen) ? viewportElement.width : this.currentCanvasImage.width
-                    this.canvas.height = (this.isFullScreen) ? viewportElement.height : this.currentCanvasImage.height
-                    this.trackTransforms(this.ctx)
+                    let viewportElement = this.$refs.viewport.getBoundingClientRect();
+                    this.canvas.width = (this.isFullScreen) ? viewportElement.width : this.currentCanvasImage.width;
+                    this.canvas.height = (this.isFullScreen) ? viewportElement.height : this.currentCanvasImage.height;
+                    this.trackTransforms(this.ctx);
 
-                    this.redraw()
+                    this.redraw();
                 }
 
                 this.currentCanvasImage.onerror = () => {
-                    console.log('cannot load this image')
+                    console.error('cannot load this image')
                 }
             } else {
                 this.currentCanvasImage = this.images[0]
@@ -776,25 +836,27 @@ export default {
         },
 
         addLayer() {
-            if (this.currentLayerImage) {
-                let hRatio = this.canvas.width / this.currentLayerImage.width;
-                let vRatio = this.canvas.height / this.currentLayerImage.height;
-                let ratio = Math.min(hRatio, vRatio);
-                let centerShift_x = (this.canvas.width - this.currentLayerImage.width * ratio) / 2;
-                let centerShift_y = (this.canvas.height - this.currentLayerImage.height * ratio) / 2;
+            if (this.currentLayerImage.length > 0) {
+                this.currentLayerImage.forEach((layerImage) => {
+                    let hRatio = this.canvas.width / layerImage.width;
+                    let vRatio = this.canvas.height / layerImage.height;
+                    let ratio = Math.min(hRatio, vRatio);
+                    let centerShift_x = (this.canvas.width - layerImage.width * ratio) / 2;
+                    let centerShift_y = (this.canvas.height - layerImage.height * ratio) / 2;
 
-                //center image
-                this.ctx.drawImage(
-                    this.currentLayerImage,
-                    this.currentLeftPosition,
-                    this.currentTopPosition,
-                    this.currentLayerImage.width,
-                    this.currentLayerImage.height,
-                    centerShift_x,
-                    centerShift_y,
-                    this.currentLayerImage.width * ratio,
-                    this.currentLayerImage.height * ratio
-                );
+                    //center image
+                    this.ctx.drawImage(
+                        layerImage,
+                        this.currentLeftPosition,
+                        this.currentTopPosition,
+                        layerImage.width,
+                        layerImage.height,
+                        centerShift_x,
+                        centerShift_y,
+                        layerImage.width * ratio,
+                        layerImage.height * ratio
+                    );
+                });
             }
         },
 
@@ -898,16 +960,21 @@ export default {
 
         update() {
             const image = this.images[this.activeImage - 1];
-            const layerImage = this.layerImages.length > 0 ? this.layerImages[this.activeImage - 1] : null;
+            this.currentLayerImage = [];
+
+            if (this.layerImages.length > 0) {
+                this.layerImages.forEach((images, index) => {
+                    if (images.length) {
+                        this.currentLayerImage[index] = images[this.activeImage - 1];
+
+                        this.currentLayerImage[index].onload = () => {
+                            this.redraw();
+                        }
+                    }
+                });
+            }
 
             this.currentCanvasImage = image
-            this.currentLayerImage = layerImage
-
-            if (this.currentLayerImage) {
-                this.currentLayerImage.onload = () => {
-                    this.redraw();
-                }
-            }
 
             this.redraw();
         },
@@ -1107,6 +1174,7 @@ export default {
 
 <style>
 .v360-viewer-container {
+    height: 100%;
     position: relative;
 }
 
@@ -1165,7 +1233,7 @@ export default {
 .v360-viewport {
     background-color: #FFF;
     width: 100%;
-    height: 100%;
+    height: auto;
     overflow: hidden;
     /* position: absolute; */
     left: 0;
@@ -1504,5 +1572,18 @@ figure.zoom img {
 
 .mobile-toggle-zoom {
     margin-top: 24px;
+}
+
+.loading-spinner {
+    position: absolute;
+    top: 50%;
+    z-index: 300;
+    font-size: 34px;
+}
+
+.mobile-preview-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
 }
 </style>
