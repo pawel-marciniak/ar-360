@@ -397,9 +397,6 @@ export default {
 
                     this.$refs.zoomContainer.style.backgroundPosition = x + '% ' + y + '%';
                 } else {
-                    let offsetX = this.$refs.viewport.offsetWidth / 2;
-                    let offsetY = this.$refs.viewport.offsetHeight / 2;
-
                     setTimeout(() => {
                         this.$refs.mobileZoomContainer.scrollTo(1500, 1000);
                     }, 500);
