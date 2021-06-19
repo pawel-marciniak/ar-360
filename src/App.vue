@@ -3,18 +3,19 @@
     <div class="wrapper">
         <div class="component">
             <View360
-                :amount=36
-                :padding-index="true"
-                :padding-size="4"
-                :index-from="0"
                 :image-path="mainImagePath"
                 :file-name="mainFileName"
+                :image-width="1280"
+                :image-height="720"
+                :show-previews="true"
+                :preview-image-path="mainBigImagePath"
+                :preview-file-name="mainBigFileName"
+                :amount=36
+                :padding-index="true"
+                :padding-index-size="4"
+                :index-from="0"
                 :layers="layers"
-                :big-previews="true"
                 :spin-reverse="true"
-                :disable-zoom="true"
-                :big-image-path="mainBigImagePath"
-                :big-file-name="mainBigFileName"
             />
         </div>
 
@@ -206,7 +207,7 @@ export default {
 .wrapper {
     display: flex;
     flex-direction: row;
-    width: 60%;
+    width: 80%;
     margin: 0 auto;
     box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
 }

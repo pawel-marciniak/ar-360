@@ -20,18 +20,23 @@
         <!--/ 360 Viewer Header -->
 
         <!-- Percentage Loader -->
-        <div class="v360-viewport" v-if="!imagesLoaded">
+        <div class="v360-viewport" v-show="!imagesLoaded">
+            <div class="progressbar">
+                <div class="progressbar__line" :style="{ width: loadingPercentage + '%' }"></div>
+            </div>
 <!--                <div class="v360-spinner-grow"></div>-->
-            <i class="fas fa-circle-notch fa-spin loading-spinner"></i>
+<!--            <i class="fas fa-circle-notch fa-spin loading-spinner"></i>-->
 <!--                <p ref="viewPercentage" class="v360-percentage-text">{{ loadingPercentage }}</p>-->
         </div>
         <!--/ Percentage Loader -->
 
         <!-- 360 viewport -->
-        <div class="v360-viewport" ref="viewport">
+        <div class="v360-viewport" ref="viewport" :class="{ 'cursor--wait': !imagesLoaded }">
             <canvas
                 class="v360-image-container"
                 ref="imageContainer"
+                :width="imageWidth"
+                :height="imageHeight"
                 v-hammer:tap="!isMobile && showBigPreview"
                 v-hammer:pinch="onPinch"
                 v-hammer:pinchend="onPinch"
@@ -134,17 +139,27 @@ export default {
             require: true,
             default: ''
         },
-        bigPreviews: {
+        imageWidth: {
+            type: Number,
+            require: false,
+            default: null
+        },
+        imageHeight: {
+            type: Number,
+            require: false,
+            default: null
+        },
+        showPreviews: {
             type: Boolean,
             require: false,
             default: false
         },
-        bigImagePath: {
+        previewImagePath: {
             type: String,
             require: false,
             default: ''
         },
-        bigFileName: {
+        previewFileName: {
             type: String,
             require: false,
             default: ''
@@ -204,7 +219,7 @@ export default {
             require: false,
             default: false
         },
-        paddingSize: {
+        paddingIndexSize: {
             type: Number,
             require: false,
             default: 2
@@ -212,7 +227,7 @@ export default {
         disableZoom: {
             type: Boolean,
             require: false,
-            default: false
+            default: true
         },
         scrollImage: {
             type: Boolean,
@@ -268,7 +283,7 @@ export default {
             currentImagePreview: null,
             layersPreviews: [],
             showImagePreview: false,
-            loadingPercentage: '0 %',
+            loadingPercentage: 0,
         }
     },
 
@@ -369,21 +384,21 @@ export default {
 
     methods: {
         showBigPreview(e) {
-            if (this.bigPreviews) {
-                const imageIndex = (this.paddingIndex) ? this.lpad((this.activeImage - 1), "0", this.paddingSize) : (this.activeImage - 1);
-                const fileName = this.bigFileName.replace('{index}', imageIndex);
+            if (this.showPreviews && this.imagesLoaded) {
+                const imageIndex = (this.paddingIndex) ? this.lpad((this.activeImage - 1), "0", this.paddingIndexSize) : (this.activeImage - 1);
+                const fileName = this.previewFileName.replace('{index}', imageIndex);
 
                 this.layersPreviews = [];
 
                 this.layers.forEach((layer, index) => {
                     if (layer) {
-                        const layerFileName = layer.bigFileName.replace('{index}', imageIndex);
+                        const layerFileName = layer.previewFileName.replace('{index}', imageIndex);
 
-                        this.$set(this.layersPreviews, index, `${layer.bigImagePath}/${layerFileName}`);
+                        this.$set(this.layersPreviews, index, `${layer.previewImagePath}/${layerFileName}`);
                     }
                 });
 
-                this.currentImagePreview = `${this.bigImagePath}/${fileName}`;
+                this.currentImagePreview = `${this.previewImagePath}/${fileName}`;
                 this.showImagePreview = true;
 
                 if (!this.isMobile) {
@@ -405,13 +420,14 @@ export default {
         },
         initData() {
             this.checkMobile();
-            this.loadInitialImage();
 
             this.canvas = this.$refs.imageContainer;
             this.ctx = this.canvas.getContext('2d');
             this.attachEvents();
             // window.addEventListener('resize', this.resizeWindow);
             // this.resizeWindow();
+
+            this.loadInitialImage();
 
             this.playing = this.autoplay;
         },
@@ -423,7 +439,7 @@ export default {
             this.loadedImages = 0;
 
             for (let i = this.indexFrom; i <= (this.amount + (this.indexFrom - 1)); i++) {
-                const imageIndex = (this.paddingIndex) ? this.lpad(i, "0", this.paddingSize) : i
+                const imageIndex = (this.paddingIndex) ? this.lpad(i, "0", this.paddingIndexSize) : i
                 const fileName = this.fileName.replace('{index}', imageIndex);
                 const filePath = `${this.imagePath}/${fileName}`;
                 this.imageData.push(filePath);
@@ -438,7 +454,7 @@ export default {
 
             if (layerData?.imagePath && layerData?.fileName) {
                 for (let i = this.indexFrom; i <= (this.amount + (this.indexFrom - 1)); i++) {
-                    const imageIndex = (this.paddingIndex) ? this.lpad(i, "0", this.paddingSize) : i
+                    const imageIndex = (this.paddingIndex) ? this.lpad(i, "0", this.paddingIndexSize) : i
                     const fileName = layerData.fileName.replace('{index}', imageIndex);
                     const filePath = `${layerData.imagePath}/${fileName}`;
                     this.layerImageData[index].push(filePath);
@@ -456,6 +472,8 @@ export default {
         },
 
         preloadImages() {
+            this.loadingPercentage = 0;
+
             if (this.imageData.length) {
                 try {
                     // this.amount = this.imageData.length;
@@ -494,7 +512,7 @@ export default {
             //image.crossOrigin='anonymous'
             image.onload = this.onImageLoad.bind(this);
             image.onerror = this.onImageLoad.bind(this);
-
+console.log('add-image');
             this.images.push(image);
         },
 
@@ -510,30 +528,22 @@ export default {
             const percentage = Math.round(this.loadedImages / this.amount * 100);
 
             this.loadedImages += 1;
-            this.updatePercentageInLoader(percentage);
+            this.loadingPercentage = percentage;
 
             if (this.loadedImages === this.amount) {
                 this.onAllImagesLoaded(event);
             } else if (this.loadedImages === 1) {
-                //this.onFirstImageLoaded(event);
                 console.log('load first image')
+                this.onFirstImageLoaded(event);
             }
-        },
-
-        updatePercentageInLoader(percentage) {
-            /* if (this.loader) {
-                this.loader.style.width = percentage + '%';
-            }
-
-            if (this.view360Icon) {
-                this.view360Icon.innerText = percentage + '%';
-            } */
-
-            this.loadingPercentage = percentage + '%';
         },
 
         onAllImagesLoaded() {
             this.imagesLoaded = true;
+            this.initData();
+        },
+
+        onFirstImageLoaded() {
             this.initData();
         },
 
@@ -599,7 +609,7 @@ export default {
 
         loadInitialImage() {
             this.currentImage = this.imageData[this.activeImage - 1];
-            this.setImage();
+            this.setImage(true);
         },
 
         resizeWindow() {
@@ -734,15 +744,14 @@ export default {
                     console.error('cannot load this image')
                 }
             } else {
-                this.currentCanvasImage = this.images[0]
-                let viewportElement = this.$refs.viewport.getBoundingClientRect()
-                this.canvas.width = (this.isFullScreen) ? viewportElement.width : this.currentCanvasImage.width
-                this.canvas.height = (this.isFullScreen) ? viewportElement.height : this.currentCanvasImage.height
-                this.trackTransforms(this.ctx)
+                this.currentCanvasImage = this.images[0];
+                let viewportElement = this.$refs.viewport.getBoundingClientRect();
+                this.canvas.width = (this.isFullScreen) ? viewportElement.width : this.currentCanvasImage.width;
+                this.canvas.height = (this.isFullScreen) ? viewportElement.height : this.currentCanvasImage.height;
+                this.trackTransforms(this.ctx);
 
                 this.redraw();
             }
-
         },
 
         redraw() {
@@ -895,9 +904,11 @@ export default {
         },
 
         startMoving(evt) {
-            this.movement = true
-            this.movementStart = evt.pageX;
-            this.$refs.viewport.style.cursor = 'grabbing';
+            if (this.imagesLoaded) {
+                this.movement = true
+                this.movementStart = evt.pageX;
+                this.$refs.viewport.style.cursor = 'grabbing';
+            }
         },
 
         doMoving(evt) {
@@ -1582,5 +1593,21 @@ figure.zoom img {
     position: absolute;
     top: 0;
     left: 0;
+}
+
+.progressbar {
+    width: 100%;
+    position: absolute;
+    z-index: 300;
+}
+
+.progressbar .progressbar__line {
+    background-color: deepskyblue;
+    height: 5px;
+    transition: width 0.5s linear;
+}
+
+.cursor--wait {
+    cursor: wait !important;
 }
 </style>
