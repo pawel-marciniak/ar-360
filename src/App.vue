@@ -20,7 +20,7 @@
         </div>
 
         <div class="configurator">
-            <div>
+            <div class="text-center">
                 <h3>Sofa colors:</h3>
 
                 <div class="pillows">
@@ -34,11 +34,13 @@
                 </div>
             </div>
 
-            <div>
+            <div class="text-center">
                 <h3>Big pillows:</h3>
 
                 <div class="pillows">
-                    <div class="pillow pillow--clear" @click="clearBigPillow"></div>
+                    <div class="pillow pillow--clear" @click="clearBigPillow">
+                        <i class="fas fa-ban"></i>
+                    </div>
 
                     <div v-for="(bigPillow) in bigPillows"
                          :key="bigPillow.fileName"
@@ -50,11 +52,13 @@
                 </div>
             </div>
 
-            <div v-show="selectedBigPillow">
+            <div class="text-center" v-show="selectedBigPillow">
                 <h3>Small pillows:</h3>
 
                 <div class="pillows">
-                    <div class="pillow pillow--clear" @click="clearSmallPillow"></div>
+                    <div class="pillow pillow--clear" @click="clearSmallPillow">
+                        <i class="fas fa-ban"></i>
+                    </div>
 
                     <div v-for="(smallPillow) in smallPillows"
                          :key="smallPillow.fileName"
@@ -202,12 +206,12 @@ export default {
 
 <style>
 #app {
-      font-family: Avenir, Helvetica, Arial, sans-serif;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      text-align: center;
-      color: #2c3e50;
-      margin-top: 60px;
+    font-family: 'Poppins', Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-align: center;
+    color: #2c3e50;
+    margin-top: 60px;
 }
 
 .wrapper {
@@ -249,7 +253,7 @@ export default {
 .pillows {
     display: flex;
     flex-direction: row;
-    justify-content: center;
+    justify-content: left;
     gap: 16px
 }
 
@@ -268,24 +272,14 @@ export default {
 }
 
 .pillow.pillow--selected {
-    border: 1px solid deepskyblue;
+    outline: 2px solid deepskyblue;
 }
 
 .pillow.pillow--clear {
     position: relative;
-}
-
-.pillow.pillow--clear:after {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    content: "\274c"; /* use the hex value here... */
     font-size: 50px;
-    color: #FFF;
-    line-height: 60px;
-    text-align: center;
+    line-height: 50px;
+    color: red;
 }
 
 .pillow-ecru {
@@ -295,5 +289,9 @@ export default {
     background-position:  10px 0, 10px 0, 0 0, 0 0;
     background-size: 10px 10px;
     background-repeat: repeat;
+}
+
+.text-center {
+    text-align: left;
 }
 </style>

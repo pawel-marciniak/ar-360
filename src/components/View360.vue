@@ -358,12 +358,29 @@ export default {
         layersJson: function (newValue, oldValue) {
             const oldLayers = JSON.parse(oldValue);
             const newLayers = JSON.parse(newValue);
+            let layersDeleted = false;
 
-            this.layers.forEach((value, index) => {
-                if (!oldLayers[index] || newLayers[index]['id'] !== oldLayers[index]['id']) {
-                    this.fetchLayerData(value, index);
+            this.layers.forEach((layer, index) => {
+                if (newLayers[index]
+                    && (
+                        (!oldLayers[index] && newLayers[index])
+                        || newLayers[index]['id'] !== oldLayers[index]['id']
+                    )
+                ) {
+                    this.fetchLayerData(layer, index);
                 }
             });
+
+            oldLayers.forEach((oldLayer, index) => {
+                if (oldLayer && !newLayers[index]) {
+                    this.clearLayerData(index);
+                    layersDeleted = true;
+                }
+            });
+
+            if (layersDeleted) {
+                this.update();
+            }
 
             this.setPreviewImages();
         },
@@ -465,6 +482,11 @@ export default {
 
                 this.preloadLayerImages(index);
             }
+        },
+
+        clearLayerData(layerIndex) {
+            this.$set(this.currentLayerImage, layerIndex, null);
+            this.$set(this.layerImages, layerIndex, []);
         },
 
         lpad(str, padString, length) {
@@ -625,7 +647,7 @@ export default {
         },
 
         checkMobile() {
-            this.isMobile = true;//!!('ontouchstart' in window || navigator.msMaxTouchPoints);
+            this.isMobile = !!('ontouchstart' in window || navigator.msMaxTouchPoints);
         },
 
         loadInitialImage(cached) {
@@ -784,6 +806,7 @@ export default {
                 this.currentLayerImage[layerIndex] = new Image();
                 this.currentLayerImage[layerIndex].crossOrigin = 'anonymous';
                 this.currentLayerImage[layerIndex].src = this.layerImageData[layerIndex][this.activeImage - 1];
+                this.currentLayerImage[layerIndex].id = 'initialImage';
 
                 this.currentLayerImage[layerIndex].onload = () => {
                     this.redraw();
