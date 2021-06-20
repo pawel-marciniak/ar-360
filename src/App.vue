@@ -8,8 +8,8 @@
                 :image-width="1280"
                 :image-height="720"
                 :show-previews="true"
-                :preview-image-path="mainBigImagePath"
-                :preview-file-name="mainBigFileName"
+                :preview-image-path="mainPreviewImagePath"
+                :preview-file-name="mainPreviewFileName"
                 :amount=36
                 :padding-index="true"
                 :padding-index-size="4"
@@ -84,76 +84,82 @@ export default {
       return {
           mainImagePath: '/images/Darby/360/1_Sofa/Solar99',
           mainFileName: 'Darby_Solar99_360_{index}.jpg',
-          mainBigImagePath: '/images/Darby/Zoom/1_Sofa/Solar99',
-          mainBigFileName: 'Darby_Solar99_Zoom_{index}.jpg',
+          mainPreviewImagePath: '/images/Darby/Zoom/1_Sofa/Solar99',
+          mainPreviewFileName: 'Darby_Solar99_Zoom_{index}.jpg',
           mainVariants: [
               {
                   imagePath: '/images/Darby/360/1_Sofa/Solar99',
                   fileName: 'Darby_Solar99_360_{index}.jpg',
-                  bigImagePath: '/images/Darby/Zoom/1_Sofa/Solar99',
-                  bigFileName: 'Darby_Solar99_Zoom_{index}.jpg',
+                  previewImagePath: '/images/Darby/Zoom/1_Sofa/Solar99',
+                  previewFileName: 'Darby_Solar99_Zoom_{index}.jpg',
                   color: 'rgb(21, 21, 21)',
               },
               {
                   imagePath: '/images/Darby/360/1_Sofa/Solar70',
                   fileName: 'Darby_Solar70_360_{index}.jpg',
-                  bigImagePath: '/images/Darby/Zoom/1_Sofa/Solar70',
-                  bigFileName: 'Darby_Solar70_Zoom_{index}.jpg',
+                  previewImagePath: '/images/Darby/Zoom/1_Sofa/Solar70',
+                  previewFileName: 'Darby_Solar70_Zoom_{index}.jpg',
                   color: 'rgb(86, 117, 120)',
               },
               {
                   imagePath: '/images/Darby/360/1_Sofa/Solar16',
                   fileName: 'Darby_Solar16_360_{index}.jpg',
-                  bigImagePath: '/images/Darby/Zoom/1_Sofa/Solar16',
-                  bigFileName: 'Darby_Solar16_Zoom_{index}.jpg',
+                  previewImagePath: '/images/Darby/Zoom/1_Sofa/Solar16',
+                  previewFileName: 'Darby_Solar16_Zoom_{index}.jpg',
                   color: 'rgb(129, 114, 107)',
               }
           ],
           bigPillows: [
               {
+                  id: 1,
                   imagePath: '/images/Darby/360/2_BigPillows/ecru',
                   fileName: 'Big_ecru-black_360_{index}.png',
-                  bigImagePath: '/images/Darby/Zoom/2_BigPillows/ecru',
-                  bigFileName: 'Big_ecru-black_Zoom_{index}.png',
+                  previewImagePath: '/images/Darby/Zoom/2_BigPillows/ecru',
+                  previewFileName: 'Big_ecru-black_Zoom_{index}.png',
                   color: 'rgb(21, 21, 21)',
                   class: 'pillow-ecru',
               },
               {
+                  id: 2,
                   imagePath: '/images/Darby/360/2_BigPillows/Rain12',
                   fileName: 'BP_Rain12_360_{index}.png',
-                  bigImagePath: '/images/Darby/Zoom/2_BigPillows/Rain12',
-                  bigFileName: 'BP_Rain12_Zoom_{index}.png',
+                  previewImagePath: '/images/Darby/Zoom/2_BigPillows/Rain12',
+                  previewFileName: 'BP_Rain12_Zoom_{index}.png',
                   color: 'rgb(255, 214, 37)',
               },
               {
+                  id: 3,
                   imagePath: '/images/Darby/360/2_BigPillows/Rain24',
                   fileName: 'Big_Rain24_360_{index}.png',
-                  bigImagePath: '/images/Darby/Zoom/2_BigPillows/Rain24',
-                  bigFileName: 'Big_Rain24_Zoom_{index}.png',
+                  previewImagePath: '/images/Darby/Zoom/2_BigPillows/Rain24',
+                  previewFileName: 'Big_Rain24_Zoom_{index}.png',
                   color: 'rgb(159, 159, 159)',
               },
           ],
           smallPillows: [
               {
+                  id: 4,
                   imagePath: '/images/Darby/360/3_SmallPillows/Ecru-black',
                   fileName: 'SP_ecru-black_360_{index}.png',
-                  bigImagePath: '/images/Darby/Zoom/3_SmallPillows/Ecru-black',
-                  bigFileName: 'SP_ecru-black_Zoom_{index}.png',
+                  previewImagePath: '/images/Darby/Zoom/3_SmallPillows/Ecru-black',
+                  previewFileName: 'SP_ecru-black_Zoom_{index}.png',
                   color: 'rgb(21, 21, 21)',
                   class: 'pillow-ecru',
               },
               {
+                  id: 5,
                   imagePath: '/images/Darby/360/3_SmallPillows/FancyYellow',
                   fileName: 'SP_fancyyellow_360_{index}.png',
-                  bigImagePath: '/images/Darby/Zoom/3_SmallPillows/FancyYellow',
-                  bigFileName: 'SP_fancyyellow_Zoom_{index}.png',
+                  previewImagePath: '/images/Darby/Zoom/3_SmallPillows/FancyYellow',
+                  previewFileName: 'SP_fancyyellow_Zoom_{index}.png',
                   color: 'rgb(255, 214, 37)',
               },
               {
+                  id: 6,
                   imagePath: '/images/Darby/360/3_SmallPillows/Rain24',
                   fileName: 'SP_Rain24_360_{index}.png',
-                  bigImagePath: '/images/Darby/Zoom/3_SmallPillows/Rain24',
-                  bigFileName: 'SP_Rain24_Zoom_{index}.png',
+                  previewImagePath: '/images/Darby/Zoom/3_SmallPillows/Rain24',
+                  previewFileName: 'SP_Rain24_Zoom_{index}.png',
                   color: 'rgb(159, 159, 159)',
               },
           ],
@@ -168,8 +174,8 @@ export default {
         selectVariant(variant, index) {
             this.mainImagePath = variant.imagePath;
             this.mainFileName = variant.fileName;
-            this.mainBigImagePath = variant.bigImagePath;
-            this.mainBigFileName = variant.bigFileName;
+            this.mainPreviewImagePath = variant.previewImagePath;
+            this.mainPreviewFileName = variant.previewFileName;
             this.selectedMainVariant = index;
         },
         selectBigPillow(bigPillow) {

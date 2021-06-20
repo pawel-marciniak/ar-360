@@ -24,9 +24,6 @@
             <div class="progressbar">
                 <div class="progressbar__line" :style="{ width: loadingPercentage + '%' }"></div>
             </div>
-<!--                <div class="v360-spinner-grow"></div>-->
-<!--            <i class="fas fa-circle-notch fa-spin loading-spinner"></i>-->
-<!--                <p ref="viewPercentage" class="v360-percentage-text">{{ loadingPercentage }}</p>-->
         </div>
         <!--/ Percentage Loader -->
 
@@ -37,7 +34,7 @@
                 ref="imageContainer"
                 :width="imageWidth"
                 :height="imageHeight"
-                v-hammer:tap="!isMobile && showBigPreview"
+                v-hammer:tap="!isMobile && showPreview"
                 v-hammer:pinch="onPinch"
                 v-hammer:pinchend="onPinch"
                 v-hammer:pinchout="onPinchOut"
@@ -72,7 +69,7 @@
         <abbr>
             <div class="v360-fullscreen-toggle text-center">
                 <div v-show="!showImagePreview"
-                     class="v360-toggle-btn"
+                     class="v360-btn v360-fullscreen-toggle__btn"
                      :class="(buttonClass === 'dark') ? 'text-light' : 'text-dark'"
                      @click="toggleFullScreen"
                 >
@@ -80,9 +77,9 @@
                 </div>
 
                 <div v-if="isMobile"
-                     class="v360-toggle-btn mobile-toggle-zoom"
+                     class="v360-btn"
                      :class="(buttonClass === 'dark') ? 'text-light' : 'text-dark'"
-                     @click="showImagePreview ? (showImagePreview = false) : showBigPreview($event)"
+                     @click="showImagePreview ? (showImagePreview = false) : showPreview($event)"
                 >
                     <i :class="(!showImagePreview) ? 'fas fa-search-plus text-lg' : 'fas fa-search-minus text-lg'"></i>
                 </div>
@@ -269,6 +266,7 @@ export default {
             stopAtEdges: false,
             imagesLoaded: false,
             loadedImages: 0,
+            layerLoadedImages: [],
             centerX: 0,
             centerY: 0,
             panmode: false,
@@ -312,17 +310,18 @@ export default {
             const layersPreviews = [...this.layersPreviews];
 
             return layersPreviews.reverse();
+        },
+        filenamePattern() {
+            return `${this.imagePath}/${this.fileName}`;
+        },
+        layersJson() {
+            return JSON.stringify(this.layers)
         }
     },
 
     watch: {
-        imagePath() {
+        filenamePattern() {
             this.fetchData();
-            this.update();
-        },
-        fileName() {
-            this.fetchData();
-            this.update();
         },
         currentLeftPosition() {
             this.redraw()
@@ -341,17 +340,12 @@ export default {
                 //exit full screen
                 this.$refs.viewerContainer.classList.remove('v360-main')
                 this.$refs.viewerContainer.classList.remove('v360-fullscreen')
-                /* this.$refs.enterFullScreenIcon.style.display = 'block'
-                this.$refs.leaveFullScreenIcon.style.display = 'none' */
             } else {
                 //enter full screen
                 this.$refs.viewerContainer.classList.add('v360-main')
                 this.$refs.viewerContainer.classList.add('v360-fullscreen')
-                /* this.$refs.enterFullScreenIcon.style.display = 'none'
-                this.$refs.leaveFullScreenIcon.style.display = 'block' */
 
             }
-            this.setImage()
         },
         playing(value) {
             if (value) {
@@ -360,22 +354,21 @@ export default {
                 this.stop()
             }
         },
-        layers: {
-            handler: function () {
-                this.layers.forEach((value, index) => {
-                    this.fetchLayerData(value, index);
-                });
+        layersJson: function (newValue, oldValue) {
+            const oldLayers = JSON.parse(oldValue);
+            const newLayers = JSON.parse(newValue);
 
-                this.update();
-            },
-            deep: true,
-        }
+            this.layers.forEach((value, index) => {
+                if (!oldLayers[index] || newLayers[index]['id'] !== oldLayers[index]['id']) {
+                    this.fetchLayerData(value, index);
+                }
+            });
+        },
     },
 
     mounted() {
-        //this.toggleFullScreen()
         this.fetchData();
-        // this.fetchLayerData();
+
         document.addEventListener('fullscreenchange', this.exitHandler);
         document.addEventListener('webkitfullscreenchange', this.exitHandler);
         document.addEventListener('mozfullscreenchange', this.exitHandler);
@@ -383,7 +376,7 @@ export default {
     },
 
     methods: {
-        showBigPreview(e) {
+        showPreview(e) {
             if (this.showPreviews && this.imagesLoaded) {
                 const imageIndex = (this.paddingIndex) ? this.lpad((this.activeImage - 1), "0", this.paddingIndexSize) : (this.activeImage - 1);
                 const fileName = this.previewFileName.replace('{index}', imageIndex);
@@ -418,7 +411,8 @@ export default {
                 }
             }
         },
-        initData() {
+
+        initData(cached) {
             this.checkMobile();
 
             this.canvas = this.$refs.imageContainer;
@@ -427,7 +421,7 @@ export default {
             // window.addEventListener('resize', this.resizeWindow);
             // this.resizeWindow();
 
-            this.loadInitialImage();
+            this.loadInitialImage(cached);
 
             this.playing = this.autoplay;
         },
@@ -445,12 +439,14 @@ export default {
                 this.imageData.push(filePath);
             }
 
-            this.preloadImages()
+            this.preloadImages();
         },
 
         fetchLayerData(layerData, index) {
+            this.imagesLoaded = false;
             this.layerImageData[index] = [];
             this.layerImages[index] = [];
+            this.layerLoadedImages[index] = 0;
 
             if (layerData?.imagePath && layerData?.fileName) {
                 for (let i = this.indexFrom; i <= (this.amount + (this.indexFrom - 1)); i++) {
@@ -476,7 +472,10 @@ export default {
 
             if (this.imageData.length) {
                 try {
-                    // this.amount = this.imageData.length;
+                    if (this.activeImage !== 1) {
+                        this.loadInitialImage();
+                    }
+
                     this.imageData.forEach(src => {
                         this.addImage(src);
                     });
@@ -489,11 +488,13 @@ export default {
         },
 
         preloadLayerImages(index) {
+            this.loadingPercentage = 0;
             this.layerImages[index] = [];
 
             if (this.layerImageData[index].length) {
                 try {
-                    // this.amount = this.layerImageData.length;
+                    this.loadLayerInitialImage(index);
+
                     this.layerImageData[index].forEach(src => {
                         this.addLayerImage(src, index);
                     });
@@ -509,10 +510,9 @@ export default {
             const image = new Image();
 
             image.src = resultSrc;
-            //image.crossOrigin='anonymous'
             image.onload = this.onImageLoad.bind(this);
             image.onerror = this.onImageLoad.bind(this);
-console.log('add-image');
+
             this.images.push(image);
         },
 
@@ -520,6 +520,8 @@ console.log('add-image');
             const image = new Image();
 
             image.src = resultSrc;
+            image.onload = () => this.onLayerImageLoad(index);
+            image.onerror = () => this.onLayerImageLoad(index);
 
             this.layerImages[index].push(image);
         },
@@ -533,8 +535,18 @@ console.log('add-image');
             if (this.loadedImages === this.amount) {
                 this.onAllImagesLoaded(event);
             } else if (this.loadedImages === 1) {
-                console.log('load first image')
                 this.onFirstImageLoaded(event);
+            }
+        },
+
+        onLayerImageLoad(layerIndex) {
+            const percentage = Math.round(this.layerLoadedImages[layerIndex] / this.amount * 100);
+
+            this.layerLoadedImages[layerIndex] += 1;
+            this.loadingPercentage = percentage;
+
+            if (this.layerLoadedImages[layerIndex] === this.amount) {
+                this.imagesLoaded = true;
             }
         },
 
@@ -544,7 +556,9 @@ console.log('add-image');
         },
 
         onFirstImageLoaded() {
-            this.initData();
+            if (this.activeImage === 1) {
+                this.initData(true);
+            }
         },
 
         togglePlay() {
@@ -607,9 +621,13 @@ console.log('add-image');
             this.isMobile = !!('ontouchstart' in window || navigator.msMaxTouchPoints);
         },
 
-        loadInitialImage() {
+        loadInitialImage(cached) {
             this.currentImage = this.imageData[this.activeImage - 1];
-            this.setImage(true);
+            this.setImage(cached);
+        },
+
+        loadLayerInitialImage(layerIndex, cached = false) {
+            this.setLayerImage(layerIndex, cached);
         },
 
         resizeWindow() {
@@ -744,13 +762,29 @@ console.log('add-image');
                     console.error('cannot load this image')
                 }
             } else {
-                this.currentCanvasImage = this.images[0];
+                this.currentCanvasImage = this.images[this.activeImage - 1];
                 let viewportElement = this.$refs.viewport.getBoundingClientRect();
                 this.canvas.width = (this.isFullScreen) ? viewportElement.width : this.currentCanvasImage.width;
                 this.canvas.height = (this.isFullScreen) ? viewportElement.height : this.currentCanvasImage.height;
                 this.trackTransforms(this.ctx);
 
                 this.redraw();
+            }
+        },
+
+        setLayerImage(layerIndex, cached = false) {
+            if (!cached) {
+                this.currentLayerImage[layerIndex] = new Image();
+                this.currentLayerImage[layerIndex].crossOrigin = 'anonymous';
+                this.currentLayerImage[layerIndex].src = this.layerImageData[layerIndex][this.activeImage - 1];
+
+                this.currentLayerImage[layerIndex].onload = () => {
+                    this.redraw();
+                }
+
+                this.currentLayerImage[layerIndex].onerror = () => {
+                    console.error('cannot load this image')
+                }
             }
         },
 
@@ -787,7 +821,6 @@ console.log('add-image');
             } catch (e) {
                 this.trackTransforms(this.ctx)
             }
-
         },
 
         addHotspots() {
@@ -836,8 +869,6 @@ console.log('add-image');
                 }
 
                 this.$refs.viewport.appendChild(divElement)
-                //console.log('draw')
-                //this.ctx.drawImage(this.currentCanvasImage, hotspotElement.x*this.canvas.width, hotspotElement.y*this.canvas.height, 10, 10)
             }
         },
 
@@ -982,7 +1013,7 @@ console.log('add-image');
                 });
             }
 
-            this.currentCanvasImage = image
+            this.currentCanvasImage = image;
 
             this.redraw();
         },
@@ -1053,9 +1084,7 @@ console.log('add-image');
         },
 
         zoom(clicks) {
-            //console.log(this.lastX + ' - ' + this.lastY)
             let factor = Math.pow(1.01, clicks);
-            //console.log(factor)
 
             if (factor > 1) {
                 this.currentScale += factor
@@ -1068,9 +1097,8 @@ console.log('add-image');
 
             if (this.currentScale > 1) {
                 let pt = this.ctx.transformedPoint(this.lastX, this.lastY);
-                this.ctx.translate(pt.x, pt.y);
 
-                //console.log(this.currentScale)
+                this.ctx.translate(pt.x, pt.y);
                 this.ctx.scale(factor, factor);
                 this.ctx.translate(-pt.x, -pt.y);
                 this.redraw();
@@ -1274,8 +1302,6 @@ console.log('add-image');
 /* FULLSCREEN & MENU TOGGLE BUTTONS */
 
 .v360-fullscreen-toggle {
-    width: 30px;
-    height: 30px;
     margin: 15px;
     position: absolute;
     /* color: #999;
@@ -1285,6 +1311,10 @@ console.log('add-image');
     top: 0;
     right: 0;
     z-index: 200;
+}
+
+.v360-fullscreen-toggle .v360-fullscreen-toggle__btn {
+    margin-bottom: 16px;
 }
 
 .v360-fullscreen-toggle:hover {
@@ -1427,8 +1457,18 @@ console.log('add-image');
     box-shadow: rgb(34, 34, 34) 0px 0px 100px inset;
 }
 
-.v360-toggle-btn i {
-    /* background-color: #fff; */
+.v360-btn {
+    background: rgba(255, 255, 255, 0.5);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+}
+
+.v360-btn i {
     font-size: 20px;
 }
 
@@ -1576,10 +1616,6 @@ figure.zoom img {
 
 .mobile-zoom-container::-webkit-scrollbar {
     display: none;
-}
-
-.mobile-toggle-zoom {
-    margin-top: 24px;
 }
 
 .loading-spinner {
