@@ -7,7 +7,7 @@
         >
             <img :src="currentImagePreview"/>
 
-            <img v-for="(layersPreview, index) in reversedLayersPreviews"
+            <img v-for="(layersPreview, index) in layersPreviews"
                  :key="layersPreview"
                  :src="layersPreview"
                  class="mobile-preview-layer"
@@ -28,7 +28,10 @@
         <!--/ Percentage Loader -->
 
         <!-- 360 viewport -->
-        <div class="v360-viewport" ref="viewport" :class="{ 'cursor--wait': !imagesLoaded }">
+        <div class="v360-viewport"
+             ref="viewport"
+             :class="{ 'cursor--wait': !imagesLoaded, 'center-canvas': isMobile }"
+        >
             <canvas
                 class="v360-image-container"
                 ref="imageContainer"
@@ -62,8 +65,18 @@
 
         <!-- Fullscreen Button -->
         <abbr>
+            <div v-if="isMobile && arUrl" class="ar-button">
+                <a :href="arUrl">
+                    <div class="v360-btn"
+                         :class="(buttonClass === 'dark') ? 'text-light' : 'text-dark'"
+                    >
+                        <i class="fas fa-cube text-lg"></i>
+                    </div>
+                </a>
+            </div>
+
             <div class="v360-fullscreen-toggle text-center">
-                <div v-show="!showImagePreview"
+                <div v-show="!showImagePreview && !isMobile"
                      class="v360-btn v360-fullscreen-toggle__btn"
                      :class="(buttonClass === 'dark') ? 'text-light' : 'text-dark'"
                      @click="toggleFullScreen"
@@ -230,6 +243,11 @@ export default {
             type: Boolean,
             require: false,
             default: false
+        },
+        mainArUrl: {
+            type: String,
+            require: false,
+            default: null
         }
     },
     data() {
@@ -311,7 +329,16 @@ export default {
         },
         layersJson() {
             return JSON.stringify(this.layers)
-        }
+        },
+        arUrl() {
+            if (this.layers.length > 0 && this.layers.some((layer) => layer !== null)) {
+                const lastLayer = this.layers[this.layers.length - 1];
+
+                return lastLayer?.arUrl;
+            }
+
+            return this.mainArUrl;
+        },
     },
 
     watch: {
@@ -792,12 +819,15 @@ export default {
                 }
             } else {
                 this.currentCanvasImage = this.images[this.activeImage - 1];
-                let viewportElement = this.$refs.viewport.getBoundingClientRect();
-                this.canvas.width = (this.isFullScreen) ? viewportElement.width : this.currentCanvasImage.width;
-                this.canvas.height = (this.isFullScreen) ? viewportElement.height : this.currentCanvasImage.height;
-                this.trackTransforms(this.ctx);
 
-                this.redraw();
+                if (this.currentCanvasImage.complete) {
+                    let viewportElement = this.$refs.viewport.getBoundingClientRect();
+                    this.canvas.width = (this.isFullScreen) ? viewportElement.width : this.currentCanvasImage.width;
+                    this.canvas.height = (this.isFullScreen) ? viewportElement.height : this.currentCanvasImage.height;
+                    this.trackTransforms(this.ctx);
+
+                    this.redraw();
+                }
             }
         },
 
@@ -1333,6 +1363,23 @@ export default {
 
 /* FULLSCREEN & MENU TOGGLE BUTTONS */
 
+.ar-button {
+    margin: 15px;
+    position: absolute;
+    /* color: #999;
+    fill: #999; */
+    float: right;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    z-index: 200;
+}
+
+.ar-button a {
+    text-decoration: none;
+    color: #2c3e50;
+}
+
 .v360-fullscreen-toggle {
     margin: 15px;
     position: absolute;
@@ -1677,5 +1724,10 @@ figure.zoom img {
 
 .cursor--wait {
     cursor: wait !important;
+}
+
+.center-canvas {
+    position: relative;
+    top: 25%;
 }
 </style>

@@ -16,6 +16,7 @@
                 :index-from="0"
                 :layers="layers"
                 :spin-reverse="true"
+                :main-ar-url="arUrl"
             />
         </div>
 
@@ -97,6 +98,7 @@ export default {
                   previewImagePath: '/images/Darby/Zoom/1_Sofa/Solar99',
                   previewFileName: 'Darby_Solar99_Zoom_{index}.jpg',
                   color: 'rgb(21, 21, 21)',
+                  arUrl: 'https://api-ar.letsdrnk.com/api/see-in-ar?configurator=brw_36714&scene=brw3',
               },
               {
                   imagePath: '/images/Darby/360/1_Sofa/Solar70',
@@ -111,6 +113,7 @@ export default {
                   previewImagePath: '/images/Darby/Zoom/1_Sofa/Solar16',
                   previewFileName: 'Darby_Solar16_Zoom_{index}.jpg',
                   color: 'rgb(129, 114, 107)',
+                  arUrl: 'https://api-ar.letsdrnk.com/api/see-in-ar?configurator=brw_36714&scene=brw3',
               }
           ],
           bigPillows: [
@@ -122,6 +125,7 @@ export default {
                   previewFileName: 'Big_ecru-black_Zoom_{index}.png',
                   color: 'rgb(21, 21, 21)',
                   class: 'pillow-ecru',
+                  arUrl: 'https://api-ar.letsdrnk.com/api/see-in-ar?configurator=brw_36714&scene=brw3',
               },
               {
                   id: 2,
@@ -130,6 +134,7 @@ export default {
                   previewImagePath: '/images/Darby/Zoom/2_BigPillows/Rain12',
                   previewFileName: 'BP_Rain12_Zoom_{index}.png',
                   color: 'rgb(255, 214, 37)',
+                  arUrl: 'https://api-ar.letsdrnk.com/api/see-in-ar?configurator=brw_36714&scene=brw3',
               },
               {
                   id: 3,
@@ -157,6 +162,7 @@ export default {
                   previewImagePath: '/images/Darby/Zoom/3_SmallPillows/FancyYellow',
                   previewFileName: 'SP_fancyyellow_Zoom_{index}.png',
                   color: 'rgb(255, 214, 37)',
+                  arUrl: 'https://api-ar.letsdrnk.com/api/see-in-ar?configurator=brw_36714&scene=brw3',
               },
               {
                   id: 6,
@@ -165,12 +171,14 @@ export default {
                   previewImagePath: '/images/Darby/Zoom/3_SmallPillows/Rain24',
                   previewFileName: 'SP_Rain24_Zoom_{index}.png',
                   color: 'rgb(159, 159, 159)',
+                  arUrl: 'https://api-ar.letsdrnk.com/api/see-in-ar?configurator=brw_36714&scene=brw3',
               },
           ],
           selectedMainVariant: 0,
           selectedBigPillow: null,
           selectedSmallPillow: null,
           layers: [],
+          arUrl: 'https://api-ar.letsdrnk.com/api/see-in-ar?configurator=brw_36714&scene=brw3',
       }
     },
 
@@ -181,6 +189,7 @@ export default {
             this.mainPreviewImagePath = variant.previewImagePath;
             this.mainPreviewFileName = variant.previewFileName;
             this.selectedMainVariant = index;
+            this.arUrl = variant.arUrl;
         },
         selectBigPillow(bigPillow) {
             this.selectedBigPillow = bigPillow;
