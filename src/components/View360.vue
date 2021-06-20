@@ -1,7 +1,7 @@
 <template>
     <!-- 360 Viewer Container -->
     <div class="v360-viewer-container" ref="viewerContainer" :id="identifier">
-        <div v-show="showImagePreview"
+        <div v-show="isMobile && showImagePreview"
              ref="mobileZoomContainer"
              class="mobile-zoom-container"
         >
@@ -48,19 +48,14 @@
                  v-hammer:pinchin="onPinchIn"
             ></div>
 
-            <figure v-show="showImagePreview && !isMobile"
+            <figure v-if="!isMobile"
                     ref="zoomContainer"
                     class="zoom"
-                    :style="{ backgroundImage: previewBackground }"
+                    :style="{ backgroundImage: previewBackground, visibility: (showImagePreview && !isMobile) ? 'visible' : 'hidden' }"
                     style="background-position: 50% 50%"
                     @mousemove="inPlaceZoom($event)"
                     @click="showImagePreview = false"
             >
-                <img :src="currentImagePreview" />
-                <img v-for="layersPreview in layersPreviews"
-                     :key="layersPreview"
-                     :src="layersPreview"
-                />
             </figure>
         </div>
         <!--/ 360 viewport -->
@@ -320,6 +315,12 @@ export default {
     },
 
     watch: {
+        previewFileName() {
+            this.setPreviewImages();
+        },
+        previewImagePath() {
+            this.setPreviewImages();
+        },
         filenamePattern() {
             this.fetchData();
         },
@@ -363,6 +364,8 @@ export default {
                     this.fetchLayerData(value, index);
                 }
             });
+
+            this.setPreviewImages();
         },
     },
 
@@ -378,20 +381,7 @@ export default {
     methods: {
         showPreview(e) {
             if (this.showPreviews && this.imagesLoaded) {
-                const imageIndex = (this.paddingIndex) ? this.lpad((this.activeImage - 1), "0", this.paddingIndexSize) : (this.activeImage - 1);
-                const fileName = this.previewFileName.replace('{index}', imageIndex);
-
-                this.layersPreviews = [];
-
-                this.layers.forEach((layer, index) => {
-                    if (layer) {
-                        const layerFileName = layer.previewFileName.replace('{index}', imageIndex);
-
-                        this.$set(this.layersPreviews, index, `${layer.previewImagePath}/${layerFileName}`);
-                    }
-                });
-
-                this.currentImagePreview = `${this.previewImagePath}/${fileName}`;
+                this.setPreviewImages();
                 this.showImagePreview = true;
 
                 if (!this.isMobile) {
@@ -405,11 +395,28 @@ export default {
 
                     this.$refs.zoomContainer.style.backgroundPosition = x + '% ' + y + '%';
                 } else {
-                    setTimeout(() => {
+                    this.$nextTick(() => {
                         this.$refs.mobileZoomContainer.scrollTo(1500, 1000);
-                    }, 500);
+                    });
                 }
             }
+        },
+
+        setPreviewImages() {
+            const imageIndex = (this.paddingIndex) ? this.lpad((this.activeImage - 1), "0", this.paddingIndexSize) : (this.activeImage - 1);
+            const fileName = this.previewFileName.replace('{index}', imageIndex);
+
+            this.layersPreviews = [];
+
+            this.layers.forEach((layer, index) => {
+                if (layer) {
+                    const layerFileName = layer.previewFileName.replace('{index}', imageIndex);
+
+                    this.$set(this.layersPreviews, index, `${layer.previewImagePath}/${layerFileName}`);
+                }
+            });
+
+            this.currentImagePreview = `${this.previewImagePath}/${fileName}`;
         },
 
         initData(cached) {
@@ -618,7 +625,7 @@ export default {
         },
 
         checkMobile() {
-            this.isMobile = !!('ontouchstart' in window || navigator.msMaxTouchPoints);
+            this.isMobile = true;//!!('ontouchstart' in window || navigator.msMaxTouchPoints);
         },
 
         loadInitialImage(cached) {
@@ -1022,6 +1029,8 @@ export default {
             this.movement = false
             this.movementStart = 0
             this.$refs.viewport.style.cursor = 'grab'
+
+            this.setPreviewImages();
         },
 
         touchStart(evt) {

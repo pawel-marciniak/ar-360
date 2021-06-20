@@ -235,7 +235,7 @@ export default {
     }
 
     .wrapper .component {
-        height: 500px;
+        height: 350px;
         border-right: none;
         border-bottom: 1px solid lightgrey;
     }
