@@ -29,8 +29,14 @@
                      @click="selectedHotspot = hotspots[index]"
                 >
                     <img :src="mainVariantHotspot" />
-                    <img v-if="bigPillowHotspots[index]" :src="bigPillowHotspots[index]" />
-                    <img v-if="smallPillowHotspots[index]" :src="smallPillowHotspots[index]" />
+                    <img v-if="bigPillowHotspots[index]"
+                         :src="bigPillowHotspots[index]"
+                         class="hotspot--layer"
+                    />
+                    <img v-if="smallPillowHotspots[index]"
+                         :src="smallPillowHotspots[index]"
+                         class="hotspot--layer"
+                    />
                 </div>
             </div>
         </div>
@@ -298,6 +304,8 @@ export default {
 }
 
 .wrapper .component {
+    display: flex;
+    flex-direction: column;
     flex-shrink: 1;
     border-right: 1px solid lightgrey;
 }
@@ -377,16 +385,17 @@ export default {
 
 .hotspots .hotspot.hotspot--active {
     opacity: 1;
+    border: 2px solid deepskyblue;
 }
 
 .hotspots .hotspot img {
     width: 100%;
+}
+
+.hotspots .hotspot img.hotspot--layer {
+    width: 100%;
     position: absolute;
     top: 0;
     left: 0;
-}
-
-.hotspots .hotspot.hotspot--active img {
-    outline: 2px solid deepskyblue;
 }
 </style>

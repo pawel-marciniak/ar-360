@@ -421,7 +421,7 @@ export default {
         },
         selectedHotspot() {
             if (this.selectedHotspot) {
-                this.activeImage = this.selectedHotspot;
+                this.activeImage = (this.selectedHotspot + 1);
                 this.update();
             }
         }
@@ -711,7 +711,7 @@ export default {
         },
 
         onPinch() {
-            console.log('on tap')
+            console.log('on pinch')
         },
 
         onPinchEnd() {
@@ -1152,6 +1152,7 @@ export default {
         stopDragging() {
             this.dragging = false
             this.dragStart = null
+            this.$emit('move-stop');
         },
 
         restrictScale() {
@@ -1571,6 +1572,7 @@ export default {
     background-position: center;
     background-size: contain;
     position: relative;
+    touch-action: pan-y !important;
 }
 
 .v360-product-box-shadow {
