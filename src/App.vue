@@ -17,7 +17,22 @@
                 :layers="layers"
                 :spin-reverse="true"
                 :main-ar-url="arUrl"
+                :selected-hotspot="selectedHotspot"
+                @move-stop="selectedHotspot = null"
             />
+
+            <div class="hotspots">
+                <div v-for="(mainVariantHotspot, index) in mainVariantHotspots"
+                     :key="mainVariantHotspot"
+                     class="hotspot"
+                     :class="{ 'hotspot--active': selectedHotspot === hotspots[index] }"
+                     @click="selectedHotspot = hotspots[index]"
+                >
+                    <img :src="mainVariantHotspot" />
+                    <img v-if="bigPillowHotspots[index]" :src="bigPillowHotspots[index]" />
+                    <img v-if="smallPillowHotspots[index]" :src="smallPillowHotspots[index]" />
+                </div>
+            </div>
         </div>
 
         <div class="configurator">
@@ -179,7 +194,46 @@ export default {
           selectedSmallPillow: null,
           layers: [],
           arUrl: 'https://api-ar.letsdrnk.com/api/see-in-ar?configurator=brw_36714&scene=brw3',
+          hotspots: [6, 14, 20, 27, 32],
+          selectedHotspot: null,
       }
+    },
+
+    computed: {
+        mainVariantHotspots() {
+            const mainVariant = this.mainVariants[this.selectedMainVariant];
+
+            return this.hotspots.map((hotspot) => {
+                const imageIndex = this.lpad(hotspot, "0", 4);
+                const imagePath = `${mainVariant.imagePath}/${mainVariant.fileName}`;
+
+                return imagePath.replace('{index}', imageIndex);
+            });
+        },
+        bigPillowHotspots() {
+            if (this.selectedBigPillow) {
+                return this.hotspots.map((hotspot) => {
+                    const imageIndex = this.lpad(hotspot, "0", 4);
+                    const imagePath = `${this.selectedBigPillow.imagePath}/${this.selectedBigPillow.fileName}`;
+
+                    return imagePath.replace('{index}', imageIndex);
+                });
+            }
+
+            return [];
+        },
+        smallPillowHotspots() {
+            if (this.selectedSmallPillow) {
+                return this.hotspots.map((hotspot) => {
+                    const imageIndex = this.lpad(hotspot, "0", 4);
+                    const imagePath = `${this.selectedSmallPillow.imagePath}/${this.selectedSmallPillow.fileName}`;
+
+                    return imagePath.replace('{index}', imageIndex);
+                });
+            }
+
+            return [];
+        },
     },
 
     methods: {
@@ -208,6 +262,12 @@ export default {
         clearSmallPillow() {
             this.selectedSmallPillow = null;
             this.$set(this.layers, 1, null);
+        },
+        lpad(str, padString, length) {
+            str = str.toString()
+
+            while (str.length < length) str = padString + str
+            return str
         },
     }
 }
@@ -302,5 +362,31 @@ export default {
 
 .text-center {
     text-align: left;
+}
+
+.hotspots {
+    display: flex;
+}
+
+.hotspots .hotspot {
+    width: 100%;
+    position: relative;
+    cursor: pointer;
+    opacity: 0.5;
+}
+
+.hotspots .hotspot.hotspot--active {
+    opacity: 1;
+}
+
+.hotspots .hotspot img {
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.hotspots .hotspot.hotspot--active img {
+    outline: 2px solid deepskyblue;
 }
 </style>

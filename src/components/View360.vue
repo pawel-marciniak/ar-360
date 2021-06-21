@@ -65,12 +65,12 @@
 
         <!-- Fullscreen Button -->
         <abbr>
-            <div v-if="isMobile && arUrl" class="ar-button">
+            <div v-if="arUrl" class="ar-button">
                 <a :href="arUrl">
                     <div class="v360-btn"
                          :class="(buttonClass === 'dark') ? 'text-light' : 'text-dark'"
                     >
-                        <i class="fas fa-cube text-lg"></i>
+                        <img src="/images/ar.png" />
                     </div>
                 </a>
             </div>
@@ -248,7 +248,12 @@ export default {
             type: String,
             require: false,
             default: null
-        }
+        },
+        selectedHotspot: {
+            type: Number,
+            require: false,
+            default: null
+        },
     },
     data() {
         return {
@@ -326,6 +331,9 @@ export default {
         },
         filenamePattern() {
             return `${this.imagePath}/${this.fileName}`;
+        },
+        previewFilenamePattern() {
+            return `${this.previewImagePath}/${this.previewFileName}`;
         },
         layersJson() {
             return JSON.stringify(this.layers)
@@ -411,6 +419,12 @@ export default {
 
             this.setPreviewImages();
         },
+        selectedHotspot() {
+            if (this.selectedHotspot) {
+                this.activeImage = this.selectedHotspot;
+                this.update();
+            }
+        }
     },
 
     mounted() {
@@ -602,19 +616,25 @@ export default {
             this.loadingPercentage = percentage;
 
             if (this.layerLoadedImages[layerIndex] === this.amount) {
-                this.imagesLoaded = true;
+                this.onAllLayerImagesLoaded(layerIndex);
             }
         },
 
         onAllImagesLoaded() {
             this.imagesLoaded = true;
             this.initData();
+            this.preloadPreviewImages();
         },
 
         onFirstImageLoaded() {
             if (this.activeImage === 1) {
                 this.initData(true);
             }
+        },
+
+        onAllLayerImagesLoaded(layerIndex) {
+            this.imagesLoaded = true;
+            this.preloadLayerPreviewImages(layerIndex);
         },
 
         togglePlay() {
@@ -1084,6 +1104,7 @@ export default {
             this.$refs.viewport.style.cursor = 'grab'
 
             this.setPreviewImages();
+            this.$emit('move-stop');
         },
 
         touchStart(evt) {
@@ -1266,6 +1287,28 @@ export default {
         toggleFullScreen() {
             this.isFullScreen = !this.isFullScreen
         },
+
+        preloadPreviewImages() {
+            for (let imageIndex = 0; imageIndex < this.amount; imageIndex++) {
+                const paddedImageIndex = (this.paddingIndex) ? this.lpad(imageIndex, "0", this.paddingIndexSize) : imageIndex;
+
+                const image = new Image();
+
+                image.src = this.previewFilenamePattern.replace('{index}', paddedImageIndex);
+            }
+        },
+
+        preloadLayerPreviewImages(layerIndex) {
+            for (let imageIndex = 0; imageIndex < this.amount; imageIndex++) {
+                const paddedImageIndex = (this.paddingIndex) ? this.lpad(imageIndex, "0", this.paddingIndexSize) : imageIndex;
+
+                const image = new Image();
+
+                const namePattern = `${this.layers[layerIndex].previewImagePath}/${this.layers[layerIndex].previewFileName}`
+
+                image.src = namePattern.replace('{index}', paddedImageIndex);
+            }
+        }
     }
 }
 </script>
@@ -1378,6 +1421,10 @@ export default {
 .ar-button a {
     text-decoration: none;
     color: #2c3e50;
+}
+
+.ar-button img {
+    width: 25px;
 }
 
 .v360-fullscreen-toggle {
