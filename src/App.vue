@@ -108,87 +108,126 @@ export default {
 
     data() {
       return {
-          mainImagePath: '/images/Darby/Sofa/360/Solar99',
-          mainFileName: 'Sofa_Solar99_360_{index}.jpg',
-          mainPreviewImagePath: '/images/Darby/Sofa/Zoom/Solar99',
-          mainPreviewFileName: 'Sofa_Solar99_Zoom_{index}.jpg',
+          mainImagePath: '/images/Combined/360/Solar70/base',
+          mainFileName: 'Sofa_Solar70_360_{index}.jpg',
+          mainPreviewImagePath: '/images/Combined/Zoom/Solar70/base',
+          mainPreviewFileName: 'Sofa_Solar70_Zoom_{index}.jpg',
           mainVariants: [
+              // {
+              //     imagePath: '/images/Darby/Sofa/360/Solar99',
+              //     fileName: 'Sofa_Solar99_360_{index}.jpg',
+              //     previewImagePath: '/images/Darby/Sofa/Zoom/Solar99',
+              //     previewFileName: 'Sofa_Solar99_Zoom_{index}.jpg',
+              //     color: 'rgb(21, 21, 21)',
+              //     arUrl: 'https://api-ar.letsdrnk.com/api/see-in-ar?configurator=brw_36714&scene=brw3',
+              // },
               {
-                  imagePath: '/images/Darby/Sofa/360/Solar99',
-                  fileName: 'Sofa_Solar99_360_{index}.jpg',
-                  previewImagePath: '/images/Darby/Sofa/Zoom/Solar99',
-                  previewFileName: 'Sofa_Solar99_Zoom_{index}.jpg',
-                  color: 'rgb(21, 21, 21)',
-                  arUrl: 'https://api-ar.letsdrnk.com/api/see-in-ar?configurator=brw_36714&scene=brw3',
-              },
-              {
-                  imagePath: '/images/Darby/Sofa/360/Solar70',
+                  imagePath: '/images/Combined/360/Solar70/base',
                   fileName: 'Sofa_Solar70_360_{index}.jpg',
-                  previewImagePath: '/images/Darby/Sofa/Zoom/Solar70',
+                  previewImagePath: '/images/Combined/Zoom/Solar70/base',
                   previewFileName: 'Sofa_Solar70_Zoom_{index}.jpg',
                   color: 'rgb(86, 117, 120)',
+                  variants: {
+                      2: {
+                          id: 2,
+                          imagePath: '/images/Combined/360/Solar70/black-beige',
+                          fileName: '70_black_beige_360_{index}.jpg',
+                          previewImagePath: '/images/Combined/Zoom/Solar70/black-beige',
+                          previewFileName: '70_black_beige_Zoom_{index}.jpg',
+                          color: 'rgb(33, 34, 34)',
+                          arUrl: 'https://api-ar.letsdrnk.com/api/see-in-ar?configurator=brw_36714&scene=brw3',
+                          variants: {
+                              4: {
+                                  id: 4,
+                                  imagePath: '/images/Combined/360/Solar70/black-beige',
+                                  fileName: '70_black_beige_360_{index}.jpg',
+                                  previewImagePath: '/images/Combined/Zoom/Solar70/black-beige',
+                                  previewFileName: '70_black_beige_Zoom_{index}.jpg',
+                                  color: 'rgb(171, 158, 146)',
+                              },
+                              5: {
+                                  id: 5,
+                                  imagePath: '/images/Combined/360/Solar70/black-blue',
+                                  fileName: '70_black_blue_360_{index}.jpg',
+                                  previewImagePath: '/images/Combined/Zoom/Solar70/black-blue',
+                                  previewFileName: '70_black_blue_Zoom_{index}.jpg',
+                                  color: 'rgb(93, 109, 119)',
+                                  arUrl: 'https://api-ar.letsdrnk.com/api/see-in-ar?configurator=brw_36714&scene=brw3',
+                              },
+                              6: {
+                                  id: 6,
+                                  imagePath: '/images/Combined/360/Solar70/black-orange',
+                                  fileName: '70_black_orange_360_{index}.jpg',
+                                  previewImagePath: '/images/Combined/Zoom/Solar70/black-orange',
+                                  previewFileName: '70_black_orange_Zoom_{index}.jpg',
+                                  color: 'rgb(239, 135, 81)',
+                                  arUrl: 'https://api-ar.letsdrnk.com/api/see-in-ar?configurator=brw_36714&scene=brw3',
+                              },
+                          }
+                      }
+                  },
               },
-              {
-                  imagePath: '/images/Darby/Sofa/360/Solo263',
-                  fileName: 'Sofa_Solo263_360_{index}.jpg',
-                  previewImagePath: '/images/Darby/Sofa/Zoom/Solo263',
-                  previewFileName: 'Sofa_Solo263_Zoom_{index}.jpg',
-                  color: 'rgb(18, 27, 82)',
-                  arUrl: 'https://api-ar.letsdrnk.com/api/see-in-ar?configurator=brw_36714&scene=brw3',
-              }
+              // {
+              //     imagePath: '/images/Darby/Sofa/360/Solo263',
+              //     fileName: 'Sofa_Solo263_360_{index}.jpg',
+              //     previewImagePath: '/images/Darby/Sofa/Zoom/Solo263',
+              //     previewFileName: 'Sofa_Solo263_Zoom_{index}.jpg',
+              //     color: 'rgb(18, 27, 82)',
+              //     arUrl: 'https://api-ar.letsdrnk.com/api/see-in-ar?configurator=brw_36714&scene=brw3',
+              // }
           ],
           bigPillows: [
-              {
-                  id: 1,
-                  imagePath: '/images/Darby/BigPillow/360/Beige',
-                  fileName: 'BP_Beige_360_{index}.png',
-                  previewImagePath: '/images/Darby/BigPillow/Zoom/Beige',
-                  previewFileName: 'BP_Beige_Zoom_{index}.png',
-                  color: 'rgb(171, 158, 146)',
-                  arUrl: 'https://api-ar.letsdrnk.com/api/see-in-ar?configurator=brw_36714&scene=brw3',
-              },
+              // {
+              //     id: 1,
+              //     imagePath: '/images/Darby/BigPillow/360/Beige',
+              //     fileName: 'BP_Beige_360_{index}.png',
+              //     previewImagePath: '/images/Darby/BigPillow/Zoom/Beige',
+              //     previewFileName: 'BP_Beige_Zoom_{index}.png',
+              //     color: 'rgb(171, 158, 146)',
+              //     arUrl: 'https://api-ar.letsdrnk.com/api/see-in-ar?configurator=brw_36714&scene=brw3',
+              // },
               {
                   id: 2,
-                  imagePath: '/images/Darby/BigPillow/360/Black',
-                  fileName: 'BP_Black_360_{index}.png',
-                  previewImagePath: '/images/Darby/BigPillow/Zoom/Black',
-                  previewFileName: 'BP_Black_Zoom_{index}.png',
+                  imagePath: '/images/Combined/360/Solar70/black-beige',
+                  fileName: '70_black_beige_360_{index}.jpg',
+                  previewImagePath: '/images/Combined/Zoom/Solar70/black-beige',
+                  previewFileName: '70_black_beige_Zoom_{index}.jpg',
                   color: 'rgb(33, 34, 34)',
                   arUrl: 'https://api-ar.letsdrnk.com/api/see-in-ar?configurator=brw_36714&scene=brw3',
               },
-              {
-                  id: 3,
-                  imagePath: '/images/Darby/BigPillow/360/Blue',
-                  fileName: 'BP_Blue_360_{index}.png',
-                  previewImagePath: '/images/Darby/BigPillow/Zoom/Blue',
-                  previewFileName: 'BP_Blue_Zoom_{index}.png',
-                  color: 'rgb(93, 109, 119)',
-              },
+              // {
+              //     id: 3,
+              //     imagePath: '/images/Darby/BigPillow/360/Blue',
+              //     fileName: 'BP_Blue_360_{index}.png',
+              //     previewImagePath: '/images/Darby/BigPillow/Zoom/Blue',
+              //     previewFileName: 'BP_Blue_Zoom_{index}.png',
+              //     color: 'rgb(93, 109, 119)',
+              // },
           ],
           smallPillows: [
               {
                   id: 4,
-                  imagePath: '/images/Darby/SmallPillow/360/Beige',
-                  fileName: 'SP_Beige_360_{index}.png',
-                  previewImagePath: '/images/Darby/SmallPillow/Zoom/Beige',
-                  previewFileName: 'SP_Beige_Zoom_{index}.png',
+                  imagePath: '/images/Combined/360/Solar70/black-beige',
+                  fileName: '70_black_beige_360_{index}.jpg',
+                  previewImagePath: '/images/Combined/Zoom/Solar70/black-beige',
+                  previewFileName: '70_black_beige_Zoom_{index}.jpg',
                   color: 'rgb(171, 158, 146)',
               },
               {
                   id: 5,
-                  imagePath: '/images/Darby/SmallPillow/360/Blue',
-                  fileName: 'SP_Blue_360_{index}.png',
-                  previewImagePath: '/images/Darby/SmallPillow/Zoom/Blue',
-                  previewFileName: 'SP_Blue_Zoom_{index}.png',
+                  imagePath: '/images/Combined/360/Solar70/black-blue',
+                  fileName: '70_black_blue_360_{index}.jpg',
+                  previewImagePath: '/images/Combined/Zoom/Solar70/black-blue',
+                  previewFileName: '70_black_blue_Zoom_{index}.jpg',
                   color: 'rgb(93, 109, 119)',
                   arUrl: 'https://api-ar.letsdrnk.com/api/see-in-ar?configurator=brw_36714&scene=brw3',
               },
               {
                   id: 6,
-                  imagePath: '/images/Darby/SmallPillow/360/Orange',
-                  fileName: 'SP_Orange_360_{index}.png',
-                  previewImagePath: '/images/Darby/SmallPillow/Zoom/Orange',
-                  previewFileName: 'SP_Orange_Zoom_{index}.png',
+                  imagePath: '/images/Combined/360/Solar70/black-orange',
+                  fileName: '70_black_orange_360_{index}.jpg',
+                  previewImagePath: '/images/Combined/Zoom/Solar70/black-orange',
+                  previewFileName: '70_black_orange_Zoom_{index}.jpg',
                   color: 'rgb(239, 135, 81)',
                   arUrl: 'https://api-ar.letsdrnk.com/api/see-in-ar?configurator=brw_36714&scene=brw3',
               },
@@ -242,30 +281,58 @@ export default {
 
     methods: {
         selectVariant(variant, index) {
-            this.mainImagePath = variant.imagePath;
-            this.mainFileName = variant.fileName;
-            this.mainPreviewImagePath = variant.previewImagePath;
-            this.mainPreviewFileName = variant.previewFileName;
-            this.selectedMainVariant = index;
-            this.arUrl = variant.arUrl;
+            if (!this.selectedBigPillow) {
+                this.mainImagePath = variant.imagePath;
+                this.mainFileName = variant.fileName;
+                this.mainPreviewImagePath = variant.previewImagePath;
+                this.mainPreviewFileName = variant.previewFileName;
+                this.selectedMainVariant = index;
+                this.arUrl = variant.arUrl;
+            } else {
+                this.selectedMainVariant = index;
+                this.selectBigPillow(this.selectedBigPillow);
+            }
         },
         selectBigPillow(bigPillow) {
-            this.selectedBigPillow = bigPillow;
-            this.$set(this.layers, 0, bigPillow);
+            if (!this.selectedSmallPillow) {
+                const selectedVariant = this.mainVariants[this.selectedMainVariant].variants[bigPillow.id];
+                this.selectedBigPillow = bigPillow;
+                // this.$set(this.layers, 0, bigPillow);
+
+                this.mainImagePath = selectedVariant.imagePath;
+                this.mainFileName = selectedVariant.fileName;
+                this.mainPreviewImagePath = selectedVariant.previewImagePath;
+                this.mainPreviewFileName = selectedVariant.previewFileName;
+                this.arUrl = selectedVariant.arUrl;
+            } else {
+                this.selectedBigPillow = bigPillow;
+                this.selectSmallPillow(this.selectedSmallPillow);
+            }
         },
         selectSmallPillow(smallPillow) {
             this.selectedSmallPillow = smallPillow;
-            this.$set(this.layers, 1, smallPillow);
+            // this.$set(this.layers, 1, smallPillow);
+
+            const selectedVariant = this.mainVariants[this.selectedMainVariant].variants[this.selectedBigPillow.id].variants[smallPillow.id];
+
+            this.mainImagePath = selectedVariant.imagePath;
+            this.mainFileName = selectedVariant.fileName;
+            this.mainPreviewImagePath = selectedVariant.previewImagePath;
+            this.mainPreviewFileName = selectedVariant.previewFileName;
+            this.arUrl = selectedVariant.arUrl;
         },
         clearBigPillow() {
             this.selectedBigPillow = null;
-            this.$set(this.layers, 0, null);
+            this.selectVariant(this.mainVariants[this.selectedMainVariant], this.selectedMainVariant);
+            // this.$set(this.layers, 0, null);
 
-            this.clearSmallPillow();
+            // this.clearSmallPillow();
         },
         clearSmallPillow() {
             this.selectedSmallPillow = null;
-            this.$set(this.layers, 1, null);
+
+            this.selectBigPillow(this.selectedBigPillow);
+            // this.$set(this.layers, 1, null);
         },
         lpad(str, padString, length) {
             str = str.toString()
