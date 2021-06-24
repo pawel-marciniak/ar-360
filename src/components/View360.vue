@@ -43,6 +43,7 @@
                 v-hammer:pinchout="onPinchOut"
                 v-hammer:pinchin="onPinchIn"
             ></canvas>
+
             <div class="v360-product-box-shadow"
                  v-if="boxShadow"
                  v-hammer:pinch="onPinch"
@@ -60,13 +61,27 @@
                     @click="showImagePreview = false"
             >
             </figure>
+
+            <div v-show="showQrModal" class="modal">
+                <div class="modal-content">
+                    <span class="close" @click="showQrModal = false">&times;</span>
+
+                    <canvas
+                        ref="canvas"
+                        class="qr-modal__canvas"
+                        height="200"
+                        width="200"
+                        style="height: 200px; width: 200px;"
+                    />
+                </div>
+            </div>
         </div>
         <!--/ 360 viewport -->
 
         <!-- Fullscreen Button -->
         <abbr>
             <div v-if="arUrl" class="ar-button">
-                <a :href="arUrl">
+                <a @click.prevent="openAr()">
                     <div class="v360-btn"
                          :class="(buttonClass === 'dark') ? 'text-light' : 'text-dark'"
                     >
@@ -130,6 +145,7 @@
 
 <script>
 const uuidv1 = require('uuid/v1');
+import QRCode from 'qrcode';
 
 export default {
     name: 'View360',
@@ -300,6 +316,7 @@ export default {
             layersPreviews: [],
             showImagePreview: false,
             loadingPercentage: 0,
+            showQrModal: false,
         }
     },
 
@@ -424,11 +441,15 @@ export default {
                 this.activeImage = (this.selectedHotspot + 1);
                 this.update();
             }
+        },
+        arUrl() {
+            this.generateArQr();
         }
     },
 
     mounted() {
         this.fetchData();
+        this.generateArQr();
 
         document.addEventListener('fullscreenchange', this.exitHandler);
         document.addEventListener('webkitfullscreenchange', this.exitHandler);
@@ -1309,6 +1330,32 @@ export default {
 
                 image.src = namePattern.replace('{index}', paddedImageIndex);
             }
+        },
+
+        generateArQr() {
+            if (this.arUrl) {
+                QRCode.toCanvas(
+                    this.$refs.canvas,
+                    this.arUrl,
+                    {
+                        scale: 4.5,
+                        width: 200,
+                    },
+                    ((error) => {
+                        if (error) {
+                            console.warn(error);
+                        }
+                    }),
+                );
+            }
+        },
+
+        openAr() {
+            if (!this.isMobile) {
+                this.showQrModal = true;
+            } else {
+                window.open(this.arUrl);
+            }
         }
     }
 }
@@ -1666,8 +1713,8 @@ export default {
 } */
 
 .modal {
-    position: fixed; /* Stay in place */
-    z-index: 200; /* Sit on top */
+    position: absolute; /* Stay in place */
+    z-index: 300; /* Sit on top */
     left: 0;
     top: 0;
     width: 100%; /* Full width */
