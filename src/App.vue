@@ -297,7 +297,6 @@ export default {
             if (!this.selectedSmallPillow) {
                 const selectedVariant = this.mainVariants[this.selectedMainVariant].variants[bigPillow.id];
                 this.selectedBigPillow = bigPillow;
-                // this.$set(this.layers, 0, bigPillow);
 
                 this.mainImagePath = selectedVariant.imagePath;
                 this.mainFileName = selectedVariant.fileName;
