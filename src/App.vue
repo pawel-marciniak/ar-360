@@ -128,7 +128,7 @@ export default {
                           fileName: '99_beige_beige_360_{index}.jpg',
                           previewImagePath: '/images/Combined/Zoom/Solar99/Solar99-beige-beige',
                           previewFileName: '99_beige_beige_Zoom_{index}.jpg',
-                          color: 'rgb(33, 34, 34)',
+                          color: 'rgb(171, 158, 146)',
                           arUrl: 'https://api-ar.letsdrnk.com/api/see-in-ar?configurator=brw_36714&scene=brw3',
                           variants: {
                               'small-pillow-beige': {
@@ -210,7 +210,7 @@ export default {
                           fileName: '99_blue_beige_360_{index}.jpg',
                           previewImagePath: '/images/Combined/Zoom/Solar99/Solar99-blue-beige',
                           previewFileName: '99_blue_beige_Zoom_{index}.jpg',
-                          color: 'rgb(33, 34, 34)',
+                          color: 'rgb(93, 109, 119)',
                           arUrl: 'https://api-ar.letsdrnk.com/api/see-in-ar?configurator=brw_36714&scene=brw3',
                           variants: {
                               'small-pillow-beige': {
