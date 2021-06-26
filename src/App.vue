@@ -29,14 +29,14 @@
                      @click="selectedHotspot = hotspots[index]"
                 >
                     <img :src="mainVariantHotspot" />
-                    <img v-if="bigPillowHotspots[index]"
-                         :src="bigPillowHotspots[index]"
-                         class="hotspot--layer"
-                    />
-                    <img v-if="smallPillowHotspots[index]"
-                         :src="smallPillowHotspots[index]"
-                         class="hotspot--layer"
-                    />
+<!--                    <img v-if="bigPillowHotspots[index]"-->
+<!--                         :src="bigPillowHotspots[index]"-->
+<!--                         class="hotspot&#45;&#45;layer"-->
+<!--                    />-->
+<!--                    <img v-if="smallPillowHotspots[index]"-->
+<!--                         :src="smallPillowHotspots[index]"-->
+<!--                         class="hotspot&#45;&#45;layer"-->
+<!--                    />-->
                 </div>
             </div>
         </div>
@@ -68,8 +68,8 @@
                          :key="bigPillow.fileName"
                          :style="{ backgroundColor: bigPillow.color }"
                          class="pillow"
-                         :class="[(selectedBigPillow === bigPillow ? 'pillow--selected' : null), (bigPillow.class || null)]"
-                         @click="selectBigPillow(bigPillow)"
+                         :class="[(selectedBigPillow === bigPillow.key ? 'pillow--selected' : null), (bigPillow.class || null)]"
+                         @click="selectBigPillow(bigPillow.key)"
                     ></div>
                 </div>
             </div>
@@ -86,8 +86,8 @@
                          :key="smallPillow.fileName"
                          class="pillow"
                          :style="{ backgroundColor: smallPillow.color }"
-                         :class="[(selectedSmallPillow === smallPillow ? 'pillow--selected' : null), (smallPillow.class || null)]"
-                         @click="selectSmallPillow(smallPillow)"
+                         :class="[(selectedSmallPillow === smallPillow.key ? 'pillow--selected' : null), (smallPillow.class || null)]"
+                         @click="selectSmallPillow(smallPillow.key)"
                     ></div>
                 </div>
             </div>
@@ -108,19 +108,144 @@ export default {
 
     data() {
       return {
-          mainImagePath: '/images/Combined/360/Solar70/base',
-          mainFileName: 'Sofa_Solar70_360_{index}.jpg',
-          mainPreviewImagePath: '/images/Combined/Zoom/Solar70/base',
-          mainPreviewFileName: 'Sofa_Solar70_Zoom_{index}.jpg',
+          mainImagePath: '/images/Combined/360/Solar99/base',
+          mainFileName: 'Sofa_Solar99_360_{index}.jpg',
+          mainPreviewImagePath: '/images/Combined/Zoom/Solar99/base',
+          mainPreviewFileName: 'Sofa_Solar99_Zoom_{index}.jpg',
           mainVariants: [
-              // {
-              //     imagePath: '/images/Darby/Sofa/360/Solar99',
-              //     fileName: 'Sofa_Solar99_360_{index}.jpg',
-              //     previewImagePath: '/images/Darby/Sofa/Zoom/Solar99',
-              //     previewFileName: 'Sofa_Solar99_Zoom_{index}.jpg',
-              //     color: 'rgb(21, 21, 21)',
-              //     arUrl: 'https://api-ar.letsdrnk.com/api/see-in-ar?configurator=brw_36714&scene=brw3',
-              // },
+              {
+                  imagePath: '/images/Combined/360/Solar99/base',
+                  fileName: 'Sofa_Solar99_360_{index}.jpg',
+                  previewImagePath: '/images/Combined/Zoom/Solar99/base',
+                  previewFileName: 'Sofa_Solar99_Zoom_{index}.jpg',
+                  color: 'rgb(21, 21, 21)',
+                  arUrl: 'https://api-ar.letsdrnk.com/api/see-in-ar?configurator=brw_36714&scene=brw3',
+                  variants: {
+                      'big-pillow-beige': {
+                          id: 7,
+                          key: 'big-pillow-beige',
+                          imagePath: '/images/Combined/360/Solar99/Solar99-beige-beige',
+                          fileName: '99_beige_beige_360_{index}.jpg',
+                          previewImagePath: '/images/Combined/Zoom/Solar99/Solar99-beige-beige',
+                          previewFileName: '99_beige_beige_Zoom_{index}.jpg',
+                          color: 'rgb(33, 34, 34)',
+                          arUrl: 'https://api-ar.letsdrnk.com/api/see-in-ar?configurator=brw_36714&scene=brw3',
+                          variants: {
+                              'small-pillow-beige': {
+                                  id: 8,
+                                  key: 'small-pillow-beige',
+                                  imagePath: '/images/Combined/360/Solar99/Solar99-beige-beige',
+                                  fileName: '99_beige_beige_360_{index}.jpg',
+                                  previewImagePath: '/images/Combined/Zoom/Solar99/Solar99-beige-beige',
+                                  previewFileName: '99_beige_beige_Zoom_{index}.jpg',
+                                  color: 'rgb(171, 158, 146)',
+                              },
+                              'small-pillow-blue': {
+                                  id: 9,
+                                  key: 'small-pillow-blue',
+                                  imagePath: '/images/Combined/360/Solar99/Solar99-beige-blue',
+                                  fileName: '99_beige_blue_360_{index}.jpg',
+                                  previewImagePath: '/images/Combined/Zoom/Solar99/Solar99-beige-blue',
+                                  previewFileName: '99_beige_blue_Zoom_{index}.jpg',
+                                  color: 'rgb(93, 109, 119)',
+                                  arUrl: 'https://api-ar.letsdrnk.com/api/see-in-ar?configurator=brw_36714&scene=brw3',
+                              },
+                              'small-pillow-orange': {
+                                  id: 10,
+                                  key: 'small-pillow-orange',
+                                  imagePath: '/images/Combined/360/Solar99/Solar99-beige-orange',
+                                  fileName: '99_beige_orange_360_{index}.jpg',
+                                  previewImagePath: '/images/Combined/Zoom/Solar99/Solar99-beige-orange',
+                                  previewFileName: '99_beige_orange_Zoom_{index}.jpg',
+                                  color: 'rgb(239, 135, 81)',
+                                  arUrl: 'https://api-ar.letsdrnk.com/api/see-in-ar?configurator=brw_36714&scene=brw3',
+                              },
+                          }
+                      },
+                      'big-pillow-black': {
+                          id: 11,
+                          key: 'big-pillow-black',
+                          imagePath: '/images/Combined/360/Solar99/Solar99-black-beige',
+                          fileName: '99_black_beige_360_{index}.jpg',
+                          previewImagePath: '/images/Combined/Zoom/Solar99/Solar99-black-beige',
+                          previewFileName: '99_black_beige_Zoom_{index}.jpg',
+                          color: 'rgb(33, 34, 34)',
+                          arUrl: 'https://api-ar.letsdrnk.com/api/see-in-ar?configurator=brw_36714&scene=brw3',
+                          variants: {
+                              'small-pillow-beige': {
+                                  id: 12,
+                                  key: 'small-pillow-beige',
+                                  imagePath: '/images/Combined/360/Solar99/Solar99-black-beige',
+                                  fileName: '99_black_beige_360_{index}.jpg',
+                                  previewImagePath: '/images/Combined/Zoom/Solar99/Solar99-black-beige',
+                                  previewFileName: '99_black_beige_Zoom_{index}.jpg',
+                                  color: 'rgb(171, 158, 146)',
+                              },
+                              'small-pillow-blue': {
+                                  id: 13,
+                                  key: 'small-pillow-blue',
+                                  imagePath: '/images/Combined/360/Solar99/Solar99-black-blue',
+                                  fileName: '99_black_blue_360_{index}.jpg',
+                                  previewImagePath: '/images/Combined/Zoom/Solar99/Solar99-black-blue',
+                                  previewFileName: '99_black_blue_Zoom_{index}.jpg',
+                                  color: 'rgb(93, 109, 119)',
+                                  arUrl: 'https://api-ar.letsdrnk.com/api/see-in-ar?configurator=brw_36714&scene=brw3',
+                              },
+                              'small-pillow-orange': {
+                                  id: 14,
+                                  key: 'small-pillow-orange',
+                                  imagePath: '/images/Combined/360/Solar99/Solar99-black-orange',
+                                  fileName: '99_black_orange_360_{index}.jpg',
+                                  previewImagePath: '/images/Combined/Zoom/Solar99/Solar99-black-orange',
+                                  previewFileName: '99_black_orange_Zoom_{index}.jpg',
+                                  color: 'rgb(239, 135, 81)',
+                                  arUrl: 'https://api-ar.letsdrnk.com/api/see-in-ar?configurator=brw_36714&scene=brw3',
+                              },
+                          }
+                      },
+                      'big-pillow-blue': {
+                          id: 15,
+                          key: 'big-pillow-blue',
+                          imagePath: '/images/Combined/360/Solar99/Solar99-blue-beige',
+                          fileName: '99_blue_beige_360_{index}.jpg',
+                          previewImagePath: '/images/Combined/Zoom/Solar99/Solar99-blue-beige',
+                          previewFileName: '99_blue_beige_Zoom_{index}.jpg',
+                          color: 'rgb(33, 34, 34)',
+                          arUrl: 'https://api-ar.letsdrnk.com/api/see-in-ar?configurator=brw_36714&scene=brw3',
+                          variants: {
+                              'small-pillow-beige': {
+                                  id: 16,
+                                  key: 'small-pillow-beige',
+                                  imagePath: '/images/Combined/360/Solar99/Solar99-blue-beige',
+                                  fileName: '99_blue_beige_360_{index}.jpg',
+                                  previewImagePath: '/images/Combined/Zoom/Solar99/Solar99-blue-beige',
+                                  previewFileName: '99_blue_beige_Zoom_{index}.jpg',
+                                  color: 'rgb(171, 158, 146)',
+                              },
+                              'small-pillow-blue': {
+                                  id: 17,
+                                  key: 'small-pillow-blue',
+                                  imagePath: '/images/Combined/360/Solar99/Solar99-blue-blue',
+                                  fileName: '99_blue_blue_360_{index}.jpg',
+                                  previewImagePath: '/images/Combined/Zoom/Solar99/Solar99-blue-blue',
+                                  previewFileName: '99_blue_blue_Zoom_{index}.jpg',
+                                  color: 'rgb(93, 109, 119)',
+                                  arUrl: 'https://api-ar.letsdrnk.com/api/see-in-ar?configurator=brw_36714&scene=brw3',
+                              },
+                              'small-pillow-orange': {
+                                  id: 18,
+                                  key: 'small-pillow-orange',
+                                  imagePath: '/images/Combined/360/Solar99/Solar99-blue-orange',
+                                  fileName: '99_blue_orange_360_{index}.jpg',
+                                  previewImagePath: '/images/Combined/Zoom/Solar99/Solar99-blue-orange',
+                                  previewFileName: '99_blue_orange_Zoom_{index}.jpg',
+                                  color: 'rgb(239, 135, 81)',
+                                  arUrl: 'https://api-ar.letsdrnk.com/api/see-in-ar?configurator=brw_36714&scene=brw3',
+                              },
+                          }
+                      }
+                  },
+              },
               {
                   imagePath: '/images/Combined/360/Solar70/base',
                   fileName: 'Sofa_Solar70_360_{index}.jpg',
@@ -128,8 +253,9 @@ export default {
                   previewFileName: 'Sofa_Solar70_Zoom_{index}.jpg',
                   color: 'rgb(86, 117, 120)',
                   variants: {
-                      2: {
+                      'big-pillow-black': {
                           id: 2,
+                          key: 'big-pillow-black',
                           imagePath: '/images/Combined/360/Solar70/black-beige',
                           fileName: '70_black_beige_360_{index}.jpg',
                           previewImagePath: '/images/Combined/Zoom/Solar70/black-beige',
@@ -137,16 +263,18 @@ export default {
                           color: 'rgb(33, 34, 34)',
                           arUrl: 'https://api-ar.letsdrnk.com/api/see-in-ar?configurator=brw_36714&scene=brw3',
                           variants: {
-                              4: {
+                              'small-pillow-beige': {
                                   id: 4,
+                                  key: 'small-pillow-beige',
                                   imagePath: '/images/Combined/360/Solar70/black-beige',
                                   fileName: '70_black_beige_360_{index}.jpg',
                                   previewImagePath: '/images/Combined/Zoom/Solar70/black-beige',
                                   previewFileName: '70_black_beige_Zoom_{index}.jpg',
                                   color: 'rgb(171, 158, 146)',
                               },
-                              5: {
+                              'small-pillow-blue': {
                                   id: 5,
+                                  key: 'small-pillow-blue',
                                   imagePath: '/images/Combined/360/Solar70/black-blue',
                                   fileName: '70_black_blue_360_{index}.jpg',
                                   previewImagePath: '/images/Combined/Zoom/Solar70/black-blue',
@@ -154,8 +282,9 @@ export default {
                                   color: 'rgb(93, 109, 119)',
                                   arUrl: 'https://api-ar.letsdrnk.com/api/see-in-ar?configurator=brw_36714&scene=brw3',
                               },
-                              6: {
+                              'small-pillow-orange': {
                                   id: 6,
+                                  key: 'small-pillow-orange',
                                   imagePath: '/images/Combined/360/Solar70/black-orange',
                                   fileName: '70_black_orange_360_{index}.jpg',
                                   previewImagePath: '/images/Combined/Zoom/Solar70/black-orange',
@@ -176,7 +305,7 @@ export default {
               //     arUrl: 'https://api-ar.letsdrnk.com/api/see-in-ar?configurator=brw_36714&scene=brw3',
               // }
           ],
-          bigPillows: [
+          // bigPillows: [
               // {
               //     id: 1,
               //     imagePath: '/images/Darby/BigPillow/360/Beige',
@@ -186,15 +315,15 @@ export default {
               //     color: 'rgb(171, 158, 146)',
               //     arUrl: 'https://api-ar.letsdrnk.com/api/see-in-ar?configurator=brw_36714&scene=brw3',
               // },
-              {
-                  id: 2,
-                  imagePath: '/images/Combined/360/Solar70/black-beige',
-                  fileName: '70_black_beige_360_{index}.jpg',
-                  previewImagePath: '/images/Combined/Zoom/Solar70/black-beige',
-                  previewFileName: '70_black_beige_Zoom_{index}.jpg',
-                  color: 'rgb(33, 34, 34)',
-                  arUrl: 'https://api-ar.letsdrnk.com/api/see-in-ar?configurator=brw_36714&scene=brw3',
-              },
+              // {
+              //     id: 2,
+              //     imagePath: '/images/Combined/360/Solar70/black-beige',
+              //     fileName: '70_black_beige_360_{index}.jpg',
+              //     previewImagePath: '/images/Combined/Zoom/Solar70/black-beige',
+              //     previewFileName: '70_black_beige_Zoom_{index}.jpg',
+              //     color: 'rgb(33, 34, 34)',
+              //     arUrl: 'https://api-ar.letsdrnk.com/api/see-in-ar?configurator=brw_36714&scene=brw3',
+              // },
               // {
               //     id: 3,
               //     imagePath: '/images/Darby/BigPillow/360/Blue',
@@ -203,35 +332,35 @@ export default {
               //     previewFileName: 'BP_Blue_Zoom_{index}.png',
               //     color: 'rgb(93, 109, 119)',
               // },
-          ],
-          smallPillows: [
-              {
-                  id: 4,
-                  imagePath: '/images/Combined/360/Solar70/black-beige',
-                  fileName: '70_black_beige_360_{index}.jpg',
-                  previewImagePath: '/images/Combined/Zoom/Solar70/black-beige',
-                  previewFileName: '70_black_beige_Zoom_{index}.jpg',
-                  color: 'rgb(171, 158, 146)',
-              },
-              {
-                  id: 5,
-                  imagePath: '/images/Combined/360/Solar70/black-blue',
-                  fileName: '70_black_blue_360_{index}.jpg',
-                  previewImagePath: '/images/Combined/Zoom/Solar70/black-blue',
-                  previewFileName: '70_black_blue_Zoom_{index}.jpg',
-                  color: 'rgb(93, 109, 119)',
-                  arUrl: 'https://api-ar.letsdrnk.com/api/see-in-ar?configurator=brw_36714&scene=brw3',
-              },
-              {
-                  id: 6,
-                  imagePath: '/images/Combined/360/Solar70/black-orange',
-                  fileName: '70_black_orange_360_{index}.jpg',
-                  previewImagePath: '/images/Combined/Zoom/Solar70/black-orange',
-                  previewFileName: '70_black_orange_Zoom_{index}.jpg',
-                  color: 'rgb(239, 135, 81)',
-                  arUrl: 'https://api-ar.letsdrnk.com/api/see-in-ar?configurator=brw_36714&scene=brw3',
-              },
-          ],
+          // ],
+          // smallPillows: [
+          //     {
+          //         id: 4,
+          //         imagePath: '/images/Combined/360/Solar70/black-beige',
+          //         fileName: '70_black_beige_360_{index}.jpg',
+          //         previewImagePath: '/images/Combined/Zoom/Solar70/black-beige',
+          //         previewFileName: '70_black_beige_Zoom_{index}.jpg',
+          //         color: 'rgb(171, 158, 146)',
+          //     },
+          //     {
+          //         id: 5,
+          //         imagePath: '/images/Combined/360/Solar70/black-blue',
+          //         fileName: '70_black_blue_360_{index}.jpg',
+          //         previewImagePath: '/images/Combined/Zoom/Solar70/black-blue',
+          //         previewFileName: '70_black_blue_Zoom_{index}.jpg',
+          //         color: 'rgb(93, 109, 119)',
+          //         arUrl: 'https://api-ar.letsdrnk.com/api/see-in-ar?configurator=brw_36714&scene=brw3',
+          //     },
+          //     {
+          //         id: 6,
+          //         imagePath: '/images/Combined/360/Solar70/black-orange',
+          //         fileName: '70_black_orange_360_{index}.jpg',
+          //         previewImagePath: '/images/Combined/Zoom/Solar70/black-orange',
+          //         previewFileName: '70_black_orange_Zoom_{index}.jpg',
+          //         color: 'rgb(239, 135, 81)',
+          //         arUrl: 'https://api-ar.letsdrnk.com/api/see-in-ar?configurator=brw_36714&scene=brw3',
+          //     },
+          // ],
           selectedMainVariant: 0,
           selectedBigPillow: null,
           selectedSmallPillow: null,
@@ -243,45 +372,51 @@ export default {
     },
 
     computed: {
+        bigPillows() {
+            return this.mainVariants[this.selectedMainVariant].variants;
+        },
+        smallPillows() {
+            return this.mainVariants[this.selectedMainVariant]?.variants[this.selectedBigPillow]?.variants || [];
+        },
         mainVariantHotspots() {
-            const mainVariant = this.mainVariants[this.selectedMainVariant];
+            // const mainVariant = this.mainVariants[this.selectedMainVariant];
 
             return this.hotspots.map((hotspot) => {
                 const imageIndex = this.lpad(hotspot, "0", 4);
-                const imagePath = `${mainVariant.imagePath}/${mainVariant.fileName}`;
+                const imagePath = `${this.mainImagePath}/${this.mainFileName}`;
 
                 return imagePath.replace('{index}', imageIndex);
             });
         },
-        bigPillowHotspots() {
-            if (this.selectedBigPillow) {
-                return this.hotspots.map((hotspot) => {
-                    const imageIndex = this.lpad(hotspot, "0", 4);
-                    const imagePath = `${this.selectedBigPillow.imagePath}/${this.selectedBigPillow.fileName}`;
-
-                    return imagePath.replace('{index}', imageIndex);
-                });
-            }
-
-            return [];
-        },
-        smallPillowHotspots() {
-            if (this.selectedSmallPillow) {
-                return this.hotspots.map((hotspot) => {
-                    const imageIndex = this.lpad(hotspot, "0", 4);
-                    const imagePath = `${this.selectedSmallPillow.imagePath}/${this.selectedSmallPillow.fileName}`;
-
-                    return imagePath.replace('{index}', imageIndex);
-                });
-            }
-
-            return [];
-        },
+        // bigPillowHotspots() {
+        //     if (this.selectedBigPillow) {
+        //         return this.hotspots.map((hotspot) => {
+        //             const imageIndex = this.lpad(hotspot, "0", 4);
+        //             const imagePath = `${this.selectedBigPillow.imagePath}/${this.selectedBigPillow.fileName}`;
+        //
+        //             return imagePath.replace('{index}', imageIndex);
+        //         });
+        //     }
+        //
+        //     return [];
+        // },
+        // smallPillowHotspots() {
+        //     if (this.selectedSmallPillow) {
+        //         return this.hotspots.map((hotspot) => {
+        //             const imageIndex = this.lpad(hotspot, "0", 4);
+        //             const imagePath = `${this.selectedSmallPillow.imagePath}/${this.selectedSmallPillow.fileName}`;
+        //
+        //             return imagePath.replace('{index}', imageIndex);
+        //         });
+        //     }
+        //
+        //     return [];
+        // },
     },
 
     methods: {
         selectVariant(variant, index) {
-            if (!this.selectedBigPillow) {
+            if (!this.selectedBigPillow || !variant.variants[this.selectedBigPillow]) {
                 this.mainImagePath = variant.imagePath;
                 this.mainFileName = variant.fileName;
                 this.mainPreviewImagePath = variant.previewImagePath;
@@ -295,7 +430,7 @@ export default {
         },
         selectBigPillow(bigPillow) {
             if (!this.selectedSmallPillow) {
-                const selectedVariant = this.mainVariants[this.selectedMainVariant].variants[bigPillow.id];
+                const selectedVariant = this.mainVariants[this.selectedMainVariant].variants[bigPillow];
                 this.selectedBigPillow = bigPillow;
 
                 this.mainImagePath = selectedVariant.imagePath;
@@ -312,13 +447,15 @@ export default {
             this.selectedSmallPillow = smallPillow;
             // this.$set(this.layers, 1, smallPillow);
 
-            const selectedVariant = this.mainVariants[this.selectedMainVariant].variants[this.selectedBigPillow.id].variants[smallPillow.id];
+            const selectedVariant = this.mainVariants[this.selectedMainVariant]?.variants[this.selectedBigPillow]?.variants[smallPillow];
 
-            this.mainImagePath = selectedVariant.imagePath;
-            this.mainFileName = selectedVariant.fileName;
-            this.mainPreviewImagePath = selectedVariant.previewImagePath;
-            this.mainPreviewFileName = selectedVariant.previewFileName;
-            this.arUrl = selectedVariant.arUrl;
+            if (selectedVariant) {
+                this.mainImagePath = selectedVariant.imagePath;
+                this.mainFileName = selectedVariant.fileName;
+                this.mainPreviewImagePath = selectedVariant.previewImagePath;
+                this.mainPreviewFileName = selectedVariant.previewFileName;
+                this.arUrl = selectedVariant.arUrl;
+            }
         },
         clearBigPillow() {
             this.selectedBigPillow = null;
