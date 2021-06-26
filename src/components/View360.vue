@@ -356,11 +356,11 @@ export default {
             return JSON.stringify(this.layers)
         },
         arUrl() {
-            if (this.layers.length > 0 && this.layers.some((layer) => layer !== null)) {
-                const lastLayer = this.layers[this.layers.length - 1];
-
-                return lastLayer?.arUrl;
-            }
+            // if (this.layers.length > 0 && this.layers.some((layer) => layer !== null)) {
+            //     const lastLayer = this.layers[this.layers.length - 1];
+            //
+            //     return lastLayer?.arUrl;
+            // }
 
             return this.mainArUrl;
         },
