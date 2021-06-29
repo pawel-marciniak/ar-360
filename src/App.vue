@@ -296,14 +296,15 @@ export default {
                       }
                   },
               },
-              // {
-              //     imagePath: '/images/Darby/Sofa/360/Solo263',
-              //     fileName: 'Sofa_Solo263_360_{index}.jpg',
-              //     previewImagePath: '/images/Darby/Sofa/Zoom/Solo263',
-              //     previewFileName: 'Sofa_Solo263_Zoom_{index}.jpg',
-              //     color: 'rgb(18, 27, 82)',
-              //     arUrl: 'https://api-ar.letsdrnk.com/api/see-in-ar?configurator=brw_36714&scene=brw3',
-              // }
+              {
+                  imagePath: '/images/Combined/360/Solo263/263-blue-blue',
+                  fileName: '263_blue_blue_360_{index}.jpg',
+                  previewImagePath: '/images/Combined/Zoom/Solo263/263-blue-blue',
+                  previewFileName: '263_blue_blue_Zoom_{index}.jpg',
+                  color: 'rgb(18, 27, 82)',
+                  arUrl: 'https://api-ar.letsdrnk.com/api/see-in-ar?configurator=brw_36714&scene=brw3',
+                  variants: {},
+              }
           ],
           // bigPillows: [
               // {
