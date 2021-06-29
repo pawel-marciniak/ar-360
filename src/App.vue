@@ -60,8 +60,11 @@
                 <h3>Big pillows:</h3>
 
                 <div class="pillows">
-                    <div class="pillow pillow--clear" @click="clearBigPillow">
-                        <i class="fas fa-ban"></i>
+                    <div class="pillow pillow--clear">
+                        <label class="switch">
+                            <input type="checkbox" v-model="bigPillowsEnabled">
+                            <span class="slider round"></span>
+                        </label>
                     </div>
 
                     <div v-for="(bigPillow) in bigPillows"
@@ -78,8 +81,11 @@
                 <h3>Small pillows:</h3>
 
                 <div class="pillows">
-                    <div class="pillow pillow--clear" @click="clearSmallPillow">
-                        <i class="fas fa-ban"></i>
+                    <div class="pillow pillow--clear">
+                        <label class="switch">
+                            <input type="checkbox" v-model="smallPillowsEnabled">
+                            <span class="slider round"></span>
+                        </label>
                     </div>
 
                     <div v-for="(smallPillow) in smallPillows"
@@ -369,6 +375,8 @@ export default {
           arUrl: 'https://api-ar.letsdrnk.com/api/see-in-ar?configurator=brw_36714&scene=brw3',
           hotspots: [6, 14, 20, 27, 32],
           selectedHotspot: null,
+          bigPillowsEnabled: false,
+          smallPillowsEnabled: false,
       }
     },
 
@@ -415,6 +423,31 @@ export default {
         // },
     },
 
+    watch: {
+        bigPillowsEnabled(value) {
+            if (value) {
+                if (!this.selectedBigPillow && this.mainVariants[this.selectedMainVariant]?.variants) {
+                    const firstBigPillow = Object.keys(this.mainVariants[this.selectedMainVariant].variants)[0];
+
+                    this.selectBigPillow(firstBigPillow);
+                }
+            } else {
+                this.clearBigPillow();
+            }
+        },
+        smallPillowsEnabled(value) {
+            if (value) {
+                if (!this.selectedSmallPillow && this.mainVariants[this.selectedMainVariant]?.variants[this.selectedBigPillow]?.variants) {
+                    const firstSmallPillow = Object.keys(this.mainVariants[this.selectedMainVariant]?.variants[this.selectedBigPillow]?.variants)[0];
+
+                    this.selectSmallPillow(firstSmallPillow);
+                }
+            } else {
+                this.clearSmallPillow();
+            }
+        }
+    },
+
     methods: {
         selectVariant(variant, index) {
             if (!this.selectedBigPillow || !variant.variants[this.selectedBigPillow]) {
@@ -430,9 +463,11 @@ export default {
             }
         },
         selectBigPillow(bigPillow) {
+            this.selectedBigPillow = bigPillow;
+            this.bigPillowsEnabled = true;
+
             if (!this.selectedSmallPillow) {
                 const selectedVariant = this.mainVariants[this.selectedMainVariant].variants[bigPillow];
-                this.selectedBigPillow = bigPillow;
 
                 this.mainImagePath = selectedVariant.imagePath;
                 this.mainFileName = selectedVariant.fileName;
@@ -440,12 +475,12 @@ export default {
                 this.mainPreviewFileName = selectedVariant.previewFileName;
                 this.arUrl = selectedVariant.arUrl;
             } else {
-                this.selectedBigPillow = bigPillow;
                 this.selectSmallPillow(this.selectedSmallPillow);
             }
         },
         selectSmallPillow(smallPillow) {
             this.selectedSmallPillow = smallPillow;
+            this.smallPillowsEnabled = true;
             // this.$set(this.layers, 1, smallPillow);
 
             const selectedVariant = this.mainVariants[this.selectedMainVariant]?.variants[this.selectedBigPillow]?.variants[smallPillow];
@@ -555,6 +590,9 @@ export default {
 }
 
 .pillow.pillow--clear {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     position: relative;
     font-size: 50px;
     line-height: 50px;
@@ -599,5 +637,65 @@ export default {
     position: absolute;
     top: 0;
     left: 0;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+input:checked + .slider {
+    background-color: #2196F3;
+}
+
+input:focus + .slider {
+    box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+    -webkit-transform: translateX(26px);
+    -ms-transform: translateX(26px);
+    transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+    border-radius: 34px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
 }
 </style>
