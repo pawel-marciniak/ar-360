@@ -57,16 +57,15 @@
             </div>
 
             <div class="text-center">
-                <h3>Big pillows:</h3>
+                <h3>
+                    Big pillows:
+                    <label class="switch switch--header">
+                        <input type="checkbox" v-model="bigPillowsEnabled">
+                        <span class="slider round"></span>
+                    </label>
+                </h3>
 
                 <div class="pillows">
-                    <div class="pillow pillow--clear">
-                        <label class="switch">
-                            <input type="checkbox" v-model="bigPillowsEnabled">
-                            <span class="slider round"></span>
-                        </label>
-                    </div>
-
                     <div v-for="(bigPillow) in bigPillows"
                          :key="bigPillow.fileName"
                          :style="{ backgroundColor: bigPillow.color }"
@@ -81,12 +80,12 @@
                 <h3>Small pillows:</h3>
 
                 <div class="pillows">
-                    <div class="pillow pillow--clear">
-                        <label class="switch">
-                            <input type="checkbox" v-model="smallPillowsEnabled">
-                            <span class="slider round"></span>
-                        </label>
-                    </div>
+<!--                    <div class="pillow pillow&#45;&#45;clear">-->
+<!--                        <label class="switch">-->
+<!--                            <input type="checkbox" v-model="smallPillowsEnabled">-->
+<!--                            <span class="slider round"></span>-->
+<!--                        </label>-->
+<!--                    </div>-->
 
                     <div v-for="(smallPillow) in smallPillows"
                          :key="smallPillow.fileName"
@@ -463,6 +462,10 @@ export default {
             }
         },
         selectBigPillow(bigPillow) {
+            if (this.selectedBigPillow === null) {
+                this.selectSmallPillow('small-pillow-beige');
+            }
+
             this.selectedBigPillow = bigPillow;
             this.bigPillowsEnabled = true;
 
@@ -644,6 +647,11 @@ export default {
     display: inline-block;
     width: 50px;
     height: 24px;
+}
+
+.switch.switch--header {
+    float: right;
+    margin: 3px 0;
 }
 
 .switch input {
