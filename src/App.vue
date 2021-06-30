@@ -21,7 +21,7 @@
                 @move-stop="selectedHotspot = null"
             />
 
-            <div class="hotspots">
+            <div v-if="!isMobile" class="hotspots">
                 <div v-for="(mainVariantHotspot, index) in mainVariantHotspots"
                      :key="mainVariantHotspot"
                      class="hotspot"
@@ -29,15 +29,18 @@
                      @click="selectedHotspot = hotspots[index]"
                 >
                     <img :src="mainVariantHotspot" />
-<!--                    <img v-if="bigPillowHotspots[index]"-->
-<!--                         :src="bigPillowHotspots[index]"-->
-<!--                         class="hotspot&#45;&#45;layer"-->
-<!--                    />-->
-<!--                    <img v-if="smallPillowHotspots[index]"-->
-<!--                         :src="smallPillowHotspots[index]"-->
-<!--                         class="hotspot&#45;&#45;layer"-->
-<!--                    />-->
                 </div>
+            </div>
+        </div>
+
+        <div v-if="isMobile" class="hotspots">
+            <div v-for="(mainVariantHotspot, index) in mainVariantHotspots"
+                 :key="mainVariantHotspot"
+                 class="hotspot"
+                 :class="{ 'hotspot--active': selectedHotspot === hotspots[index] }"
+                 @click="selectedHotspot = hotspots[index]"
+            >
+                <img :src="mainVariantHotspot" />
             </div>
         </div>
 
@@ -528,6 +531,9 @@ export default {
                 return imagePath.replace('{index}', imageIndex);
             });
         },
+        isMobile() {
+            return !!('ontouchstart' in window || navigator.msMaxTouchPoints);
+        },
         // bigPillowHotspots() {
         //     if (this.selectedBigPillow) {
         //         return this.hotspots.map((hotspot) => {
@@ -749,6 +755,14 @@ export default {
 
 .hotspots {
     display: flex;
+    min-height: 130px;
+}
+
+@media screen and (max-width: 768px) {
+    .hotspots {
+        display: flex;
+        min-height: 45px;
+    }
 }
 
 .hotspots .hotspot {

@@ -64,7 +64,9 @@
 
             <div v-show="showQrModal" class="modal">
                 <div class="modal-content">
-                    <span class="close" @click="showQrModal = false">&times;</span>
+                    <div style="text-align: right">
+                        <span class="close" @click="showQrModal = false">&times;</span>
+                    </div>
 
                     <canvas
                         ref="canvas"
@@ -72,6 +74,22 @@
                         height="200"
                         width="200"
                         style="height: 200px; width: 200px;"
+                    />
+
+                    <p class="qr-modal__caption">
+                        Scan QR with phone camera
+                    </p>
+
+                    <p class="qr-modal__support-text">
+                        AR is supported on the following devices:<br />
+                        iPhone on iOS 12+<br />
+                        Android 8.0+ with ARCore 1.9 support
+                    </p>
+
+                    <img
+                        class="qr-modal__logo"
+                        alt="logo"
+                        src="https://ar-assets.reetailar.com/omz/images/New_Omniaz_logo.png"
                     />
                 </div>
             </div>
@@ -475,7 +493,9 @@ export default {
                     this.$refs.zoomContainer.style.backgroundPosition = x + '% ' + y + '%';
                 } else {
                     this.$nextTick(() => {
-                        this.$refs.mobileZoomContainer.scrollTo(1500, 1000);
+                        setTimeout(() => {
+                            this.$refs.mobileZoomContainer.scrollTo(1500, 1000);
+                        }, 100);
                     });
                 }
             }
@@ -1727,17 +1747,17 @@ export default {
 /* Modal Content/Box */
 .modal-content {
     background-color: #fefefe;
-    margin: 15% auto; /* 15% from the top and centered */
+    margin: 50px auto; /* 15% from the top and centered */
     padding: 20px;
     border: 1px solid #888;
-    width: 80%; /* Could be more or less, depending on screen size */
+    display: inline-block;
 }
 
 /* The Close Button */
 .close {
     color: #aaa;
-    float: right;
     font-size: 28px;
+    line-height: 28px;
     font-weight: bold;
 }
 
@@ -1825,5 +1845,25 @@ figure.zoom img {
 .center-canvas {
     position: relative;
     top: 25%;
+}
+
+.qr-modal__caption {
+      color: #00253C;
+      font-weight: 500;
+      font-size: 1.15em;
+  }
+
+.qr-modal__support-text {
+      color: #5a5a5a;
+      font-weight: 500;
+      font-size: 0.8em;
+      border-top: 0.11em solid #C4F1EF;
+      padding-top: 2em;
+      text-align: center;
+  }
+
+.qr-modal__logo {
+    width: 100px;
+    padding-top: 1em;
 }
 </style>
