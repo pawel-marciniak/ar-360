@@ -71,9 +71,9 @@
                     <canvas
                         ref="canvas"
                         class="qr-modal__canvas"
-                        height="200"
-                        width="200"
-                        style="height: 200px; width: 200px;"
+                        height="150"
+                        width="150"
+                        style="height: 150px; width: 150px;"
                     />
 
                     <p class="qr-modal__caption">
@@ -1359,7 +1359,7 @@ export default {
                     this.arUrl,
                     {
                         scale: 4.5,
-                        width: 200,
+                        width: 150,
                     },
                     ((error) => {
                         if (error) {
