@@ -1,6 +1,10 @@
 <template>
     <!-- 360 Viewer Container -->
     <div class="v360-viewer-container" ref="viewerContainer" :id="identifier">
+        <div class="info-window">
+            Drag to Rotate & Click to Zoom
+        </div>
+
         <div v-show="isMobile && showImagePreview"
              ref="mobileZoomContainer"
              class="mobile-zoom-container"
@@ -100,7 +104,7 @@
         <abbr>
             <div v-if="arUrl" class="ar-button">
                 <a @click.prevent="openAr()">
-                    <div class="v360-btn"
+                    <div class="v360-btn v360-btn--big"
                          :class="(buttonClass === 'dark') ? 'text-light' : 'text-dark'"
                     >
                         <img src="/images/ar.png" />
@@ -1492,7 +1496,15 @@ export default {
 }
 
 .ar-button img {
-    width: 25px;
+    width: 80%;
+}
+
+.info-window {
+    position: absolute;
+    bottom: 10px;
+    z-index: 200;
+    pointer-events: none;
+    width: 100%;
 }
 
 .v360-fullscreen-toggle {
@@ -1663,6 +1675,11 @@ export default {
     box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
 }
 
+.v360-btn--big {
+    width: 50px;
+    height: 50px;
+}
+
 .v360-btn i {
     font-size: 20px;
 }
@@ -1739,7 +1756,7 @@ export default {
     top: 0;
     width: 100%; /* Full width */
     height: 100%; /* Full height */
-    overflow: auto; /* Enable scroll if needed */
+    overflow: hidden; /* Enable scroll if needed */
     background-color: rgb(0, 0, 0); /* Fallback color */
     background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
 }
